@@ -1,0 +1,333 @@
+'use client'
+
+import { useState, useEffect, useCallback } from 'react'
+import { useRouter } from 'next/navigation'
+import Link from 'next/link'
+import DashboardHeader from '@/components/seller/DashboardHeader'
+import StatsCard from '@/components/seller/StatsCard'
+import TabBar from '@/components/seller/TabBar'
+import FilterPills from '@/components/seller/FilterPills'
+import OrderCard from '@/components/seller/OrderCard'
+import ProductCard from '@/components/seller/ProductCard'
+import EmptyState from '@/components/seller/EmptyState'
+import ConfirmationBanner from '@/components/seller/ConfirmationBanner'
+
+interface Seller {
+  id: string
+  shop_name: string
+  shop_slug: string
+}
+
+interface Stats {
+  total_earnings: number
+  total_orders: number
+  pending_orders: number
+  total_products: number
+}
+
+interface Order {
+  id: string
+  order_number: string
+  status: 'pending' | 'confirmed' | 'shipping' | 'delivered' | 'cancelled'
+  customer_name: string
+  customer_phone: string
+  customer_address: string
+  delivery_notes?: string
+  subtotal: number
+  total: number
+  scheduled_date?: string
+  scheduled_time?: string
+  created_at: string
+  order_items: Array<{
+    id: string
+    product_name: string
+    quantity: number
+    product_price: number
+  }>
+}
+
+interface Product {
+  id: string
+  name: string
+  price: number
+  stock: number
+  image_url?: string
+  is_active: boolean
+}
+
+export default function SellerDashboard() {
+  const router = useRouter()
+  const [seller, setSeller] = useState<Seller | null>(null)
+  const [stats, setStats] = useState<Stats | null>(null)
+  const [orders, setOrders] = useState<Order[]>([])
+  const [products, setProducts] = useState<Product[]>([])
+  const [activeTab, setActiveTab] = useState<'orders' | 'products'>('orders')
+  const [orderFilter, setOrderFilter] = useState('all')
+  const [loading, setLoading] = useState(true)
+  const [confirmingAll, setConfirmingAll] = useState(false)
+  const [refreshing, setRefreshing] = useState(false)
+
+  // Fetch seller data
+  const fetchSeller = useCallback(async () => {
+    try {
+      const res = await fetch('/api/sellers/me')
+      const data = await res.json()
+
+      if (!data.success) {
+        if (data.error === 'unauthorized') {
+          router.push('/seller/signup')
+          return
+        }
+        throw new Error(data.message)
+      }
+
+      setSeller(data.seller)
+
+      // If onboarding not completed, redirect
+      if (!data.seller.onboarding_completed) {
+        router.push('/seller/signup/info')
+        return
+      }
+    } catch (error) {
+      console.error('Failed to fetch seller:', error)
+    }
+  }, [router])
+
+  // Fetch stats
+  const fetchStats = useCallback(async () => {
+    try {
+      const res = await fetch('/api/sellers/me/stats')
+      const data = await res.json()
+      if (data.success) {
+        setStats(data.stats)
+      }
+    } catch (error) {
+      console.error('Failed to fetch stats:', error)
+    }
+  }, [])
+
+  // Fetch orders
+  const fetchOrders = useCallback(async () => {
+    try {
+      const statusParam = orderFilter !== 'all' ? `&status=${orderFilter}` : ''
+      const res = await fetch(`/api/sellers/me/orders?page=1&limit=50${statusParam}`)
+      const data = await res.json()
+      if (data.success) {
+        setOrders(data.orders)
+      }
+    } catch (error) {
+      console.error('Failed to fetch orders:', error)
+    }
+  }, [orderFilter])
+
+  // Fetch products
+  const fetchProducts = useCallback(async () => {
+    try {
+      const res = await fetch('/api/sellers/me/products')
+      const data = await res.json()
+      if (data.success) {
+        setProducts(data.products)
+      }
+    } catch (error) {
+      console.error('Failed to fetch products:', error)
+    }
+  }, [])
+
+  // Initial load
+  useEffect(() => {
+    const loadData = async () => {
+      setLoading(true)
+      await fetchSeller()
+      await Promise.all([fetchStats(), fetchOrders(), fetchProducts()])
+      setLoading(false)
+    }
+    loadData()
+  }, [fetchSeller, fetchStats, fetchOrders, fetchProducts])
+
+  // Refetch orders when filter changes
+  useEffect(() => {
+    if (!loading) {
+      fetchOrders()
+    }
+  }, [orderFilter, fetchOrders, loading])
+
+  // Pull to refresh
+  const handleRefresh = async () => {
+    setRefreshing(true)
+    await Promise.all([fetchStats(), fetchOrders(), fetchProducts()])
+    setRefreshing(false)
+  }
+
+  // Confirm all pending orders
+  const handleConfirmAll = async () => {
+    if (!confirm(`ยืนยันส่งของวันนี้ ${stats?.pending_orders || 0} รายการ?`)) return
+
+    setConfirmingAll(true)
+    try {
+      const res = await fetch('/api/sellers/me/orders', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'confirm_all' })
+      })
+      const data = await res.json()
+
+      if (data.success) {
+        await Promise.all([fetchStats(), fetchOrders()])
+        alert(data.message)
+      }
+    } catch (error) {
+      console.error('Failed to confirm orders:', error)
+      alert('เกิดข้อผิดพลาด กรุณาลองใหม่')
+    } finally {
+      setConfirmingAll(false)
+    }
+  }
+
+  // Update single order status
+  const handleOrderStatusChange = async (orderId: string, newStatus: string) => {
+    try {
+      const res = await fetch(`/api/sellers/me/orders/${orderId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status: newStatus })
+      })
+      const data = await res.json()
+
+      if (!data.success) {
+        alert(data.message || 'เกิดข้อผิดพลาด')
+        return
+      }
+
+      await Promise.all([fetchOrders(), fetchStats()])
+    } catch (error) {
+      console.error('Failed to update order:', error)
+      alert('เกิดข้อผิดพลาด กรุณาลองใหม่')
+    }
+  }
+
+  // Copy shop link
+  const handleCopyLink = async () => {
+    if (!seller?.shop_slug) return
+    try {
+      await navigator.clipboard.writeText(`https://tapshop.me/${seller.shop_slug}`)
+      alert('คัดลอกลิงก์แล้ว!')
+    } catch (err) {
+      console.error('Failed to copy:', err)
+    }
+  }
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-white flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-8 h-8 border-2 border-black border-t-transparent rounded-full animate-spin mx-auto mb-4" />
+          <p className="text-secondary">กำลังโหลด...</p>
+        </div>
+      </div>
+    )
+  }
+
+  return (
+    <div className="min-h-screen bg-white">
+      <div className="px-[5%] pb-24">
+        {/* Header */}
+        <DashboardHeader shopName={seller?.shop_name || ''} />
+
+        {/* Stats */}
+        <div className="mb-6">
+          <StatsCard
+            totalEarnings={stats?.total_earnings || 0}
+            shopSlug={seller?.shop_slug || ''}
+          />
+        </div>
+
+        {/* Confirmation Banner */}
+        {stats && stats.pending_orders > 0 && (
+          <div className="mb-6">
+            <ConfirmationBanner
+              pendingCount={stats.pending_orders}
+              onConfirmAll={handleConfirmAll}
+              loading={confirmingAll}
+            />
+          </div>
+        )}
+
+        {/* Pull to refresh indicator */}
+        {refreshing && (
+          <div className="text-center py-2">
+            <div className="w-5 h-5 border-2 border-black border-t-transparent rounded-full animate-spin mx-auto" />
+          </div>
+        )}
+
+        {/* Tab Bar */}
+        <TabBar
+          activeTab={activeTab}
+          onTabChange={setActiveTab}
+          orderCount={stats?.total_orders}
+          productCount={stats?.total_products}
+        />
+
+        {/* Content */}
+        {activeTab === 'orders' ? (
+          <div>
+            {/* Filter Pills */}
+            <FilterPills
+              activeFilter={orderFilter}
+              onFilterChange={setOrderFilter}
+            />
+
+            {/* Orders List */}
+            {orders.length > 0 ? (
+              <div className="space-y-4">
+                {orders.map((order) => (
+                  <OrderCard
+                    key={order.id}
+                    order={order}
+                    onStatusChange={handleOrderStatusChange}
+                  />
+                ))}
+              </div>
+            ) : (
+              <EmptyState
+                icon="orders"
+                title="ยังไม่มีออเดอร์"
+                description="แชร์ลิงก์ร้านให้ลูกค้าเพื่อเริ่มขาย"
+                actionLabel="คัดลอกลิงก์ร้าน"
+                onAction={handleCopyLink}
+              />
+            )}
+          </div>
+        ) : (
+          <div className="pt-4">
+            {/* Products Grid */}
+            {products.length > 0 ? (
+              <div className="grid grid-cols-2 gap-4">
+                {products.map((product) => (
+                  <ProductCard key={product.id} product={product} />
+                ))}
+              </div>
+            ) : (
+              <EmptyState
+                icon="products"
+                title="ยังไม่มีสินค้า"
+                description="เพิ่มสินค้าเพื่อเริ่มขาย"
+                actionLabel="เพิ่มสินค้าชิ้นแรก"
+                onAction={() => router.push('/seller/products/new')}
+              />
+            )}
+          </div>
+        )}
+      </div>
+
+      {/* Floating Action Button */}
+      <Link
+        href="/seller/products/new"
+        className="fixed bottom-6 right-6 w-14 h-14 bg-black text-white rounded-full shadow-lg flex items-center justify-center hover:bg-neutral-800 transition-colors"
+      >
+        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+        </svg>
+      </Link>
+    </div>
+  )
+}

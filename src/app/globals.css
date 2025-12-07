@@ -1,26 +1,100 @@
 @import "tailwindcss";
 
+/* TapShop Design System */
 :root {
+  /* Colors from spec */
   --background: #ffffff;
-  --foreground: #171717;
+  --foreground: #000000;
+  --border: #e5e5e5;
+  --secondary: #737373;
+  --success: #22c55e;
+  --warning: #eab308;
+  --error: #ef4444;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  --color-border: var(--border);
+  --color-secondary: var(--secondary);
+  --color-success: var(--success);
+  --color-warning: var(--warning);
+  --color-error: var(--error);
+  --color-border-primary: var(--border);
+  --color-text-primary: var(--foreground);
+  --color-background-primary: var(--background);
+  --color-neutral-light: #d4d4d4;
+  --color-neutral-white: var(--background);
+  --font-sans: var(--font-inter), var(--font-noto-thai), ui-sans-serif, system-ui, sans-serif;
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-sans);
+}
+
+/* Product card aspect ratio from Relume */
+.aspect-product {
+  aspect-ratio: 5/6;
+}
+
+/* Animations */
+@keyframes slide-up {
+  from {
+    transform: translateY(100%);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+
+@keyframes slide-left {
+  from {
+    transform: translateX(100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes toast-slide-up {
+  from {
+    transform: translateY(100%) translateX(-50%);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0) translateX(-50%);
+    opacity: 1;
+  }
+}
+
+.animate-slide-up {
+  animation: slide-up 0.3s ease-out;
+}
+
+.animate-slide-left {
+  animation: slide-left 0.3s ease-out;
+}
+
+.animate-fade-in {
+  animation: fade-in 0.2s ease-out;
+}
+
+.animate-toast {
+  animation: toast-slide-up 0.3s ease-out;
+}
+
+/* Safe area for mobile bottom bar */
+.safe-area-bottom {
+  padding-bottom: max(1rem, env(safe-area-inset-bottom));
 }
