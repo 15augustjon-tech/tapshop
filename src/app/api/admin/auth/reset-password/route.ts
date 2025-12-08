@@ -1,10 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createServiceRoleClient } from '@/lib/supabase-server'
-import crypto from 'crypto'
-
-function hashPassword(password: string): string {
-  return crypto.createHash('sha256').update(password).digest('hex')
-}
+import bcrypt from 'bcryptjs'
 
 export async function POST(request: NextRequest) {
   try {
@@ -56,8 +52,8 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Hash the new password
-    const passwordHash = hashPassword(password)
+    // Hash the new password with bcrypt
+    const passwordHash = await bcrypt.hash(password, 12)
 
     // Update password and clear reset token
     const { error: updateError } = await supabase

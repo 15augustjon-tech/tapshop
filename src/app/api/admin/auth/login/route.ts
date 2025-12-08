@@ -1,12 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
 import { createServiceRoleClient } from '@/lib/supabase-server'
+import bcrypt from 'bcryptjs'
 import crypto from 'crypto'
-
-// Simple hash function for password comparison
-function hashPassword(password: string): string {
-  return crypto.createHash('sha256').update(password).digest('hex')
-}
 
 // Generate session token
 function generateSessionToken(): string {
@@ -36,7 +32,7 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Check for password override in database (from password reset)
+    // Check for password in database first (from password reset)
     let isPasswordValid = false
     const supabase = createServiceRoleClient()
 
@@ -48,9 +44,8 @@ export async function POST(request: NextRequest) {
         .single()
 
       if (settings?.password_hash) {
-        // Use database password
-        const hashedInput = hashPassword(password)
-        isPasswordValid = hashedInput === settings.password_hash
+        // Use bcrypt to compare database password
+        isPasswordValid = await bcrypt.compare(password, settings.password_hash)
       }
     } catch {
       // Table doesn't exist or other error, fall back to env var
@@ -68,21 +63,27 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Generate session token
+    // Generate session token and store in database
     const sessionToken = generateSessionToken()
-    const hashedToken = hashPassword(sessionToken)
+    const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000) // 7 days
 
-    // Store hashed token in cookie
+    // Store session in database (upsert to admin_settings)
+    const { error: sessionError } = await supabase
+      .from('admin_settings')
+      .upsert({
+        id: 'admin',
+        session_token: sessionToken,
+        session_expires: expiresAt.toISOString()
+      }, { onConflict: 'id' })
+
+    if (sessionError) {
+      console.error('Session save error:', sessionError)
+      // Continue anyway - cookie-only fallback
+    }
+
+    // Store session token in cookie
     const cookieStore = await cookies()
-    cookieStore.set('admin_session', hashedToken, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
-      maxAge: 60 * 60 * 24 * 7, // 7 days
-      path: '/'
-    })
-
-    cookieStore.set('admin_session_valid', 'true', {
+    cookieStore.set('admin_session', sessionToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'lax',
