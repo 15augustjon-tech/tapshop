@@ -55,7 +55,7 @@ const translations: Record<Language, Record<string, string>> = {
     'pricing.noFees': 'จ่ายค่าส่งเมื่อมีออเดอร์',
     'pricing.payWhen': 'ค่าส่งคิดตามระยะทาง',
     'pricing.perOrder': 'เก็บเงินปลายทางรวมแล้ว',
-    'pricing.auto': 'ไม่มีค่าใช้จ่ายแอบแฝง',
+    'pricing.auto': '',
     'pricing.cta': 'เปิดร้านเลย',
 
     // FAQ
@@ -176,7 +176,7 @@ const translations: Record<Language, Record<string, string>> = {
     'pricing.noFees': 'No signup fee, no monthly fee',
     'pricing.payWhen': 'We handle delivery',
     'pricing.perOrder': 'You sell, we deliver',
-    'pricing.auto': 'No hidden fees',
+    'pricing.auto': '',
     'pricing.cta': 'Create Shop',
 
     // FAQ
