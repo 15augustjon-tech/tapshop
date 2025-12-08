@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
+import Link from 'next/link'
 
 export default function AdminLoginPage() {
   const router = useRouter()
@@ -84,6 +85,15 @@ export default function AdminLoginPage() {
             {loading ? 'กำลังเข้าสู่ระบบ...' : 'เข้าสู่ระบบ'}
           </button>
         </form>
+
+        <div className="mt-6 text-center">
+          <Link
+            href="/admin/forgot-password"
+            className="text-gray-500 hover:text-black text-sm"
+          >
+            ลืมรหัสผ่าน?
+          </Link>
+        </div>
       </div>
     </div>
   )

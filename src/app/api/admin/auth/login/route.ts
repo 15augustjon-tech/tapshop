@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
+import { createServiceRoleClient } from '@/lib/supabase-server'
 import crypto from 'crypto'
 
 // Simple hash function for password comparison
@@ -20,15 +21,47 @@ export async function POST(request: NextRequest) {
     const adminEmail = process.env.ADMIN_EMAIL
     const adminPassword = process.env.ADMIN_PASSWORD
 
-    if (!adminEmail || !adminPassword) {
+    if (!adminEmail) {
       return NextResponse.json(
         { success: false, message: 'Admin credentials not configured' },
         { status: 500 }
       )
     }
 
-    // Check credentials
-    if (email !== adminEmail || password !== adminPassword) {
+    // Check email first
+    if (email !== adminEmail) {
+      return NextResponse.json(
+        { success: false, message: 'อีเมลหรือรหัสผ่านไม่ถูกต้อง' },
+        { status: 401 }
+      )
+    }
+
+    // Check for password override in database (from password reset)
+    let isPasswordValid = false
+    const supabase = createServiceRoleClient()
+
+    try {
+      const { data: settings } = await supabase
+        .from('admin_settings')
+        .select('password_hash')
+        .eq('id', 'admin')
+        .single()
+
+      if (settings?.password_hash) {
+        // Use database password
+        const hashedInput = hashPassword(password)
+        isPasswordValid = hashedInput === settings.password_hash
+      }
+    } catch {
+      // Table doesn't exist or other error, fall back to env var
+    }
+
+    // Fall back to env var password if not using database password
+    if (!isPasswordValid && adminPassword) {
+      isPasswordValid = password === adminPassword
+    }
+
+    if (!isPasswordValid) {
       return NextResponse.json(
         { success: false, message: 'อีเมลหรือรหัสผ่านไม่ถูกต้อง' },
         { status: 401 }
@@ -49,9 +82,6 @@ export async function POST(request: NextRequest) {
       path: '/'
     })
 
-    // Also store the token verification in env (we'll compare the hash)
-    // For simplicity, we'll store valid session hashes in memory
-    // In production, you'd use a database or Redis
     cookieStore.set('admin_session_valid', 'true', {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
