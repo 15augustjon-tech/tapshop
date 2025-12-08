@@ -22,6 +22,7 @@ export default function SellerSignupPage() {
   const [loading, setLoading] = useState(false)
   const [countdown, setCountdown] = useState(0)
   const [confirmationResult, setConfirmationResult] = useState<ConfirmationResult | null>(null)
+  const [recaptchaReady, setRecaptchaReady] = useState(false)
 
   // Countdown timer for resend
   useEffect(() => {
@@ -47,6 +48,8 @@ export default function SellerSignupPage() {
     if (typeof window === 'undefined') return
     if (step !== 'phone') return
 
+    setRecaptchaReady(false)
+
     // Clear any existing verifier
     if (recaptchaVerifier) {
       try {
@@ -57,10 +60,18 @@ export default function SellerSignupPage() {
       recaptchaVerifier = null
     }
 
-    // Wait for DOM to be ready (longer timeout for safety)
-    const timer = setTimeout(() => {
+    let attempts = 0
+    const maxAttempts = 5
+
+    const initRecaptcha = () => {
+      attempts++
       const container = document.getElementById('recaptcha-container')
+
       if (!container || !auth) {
+        // Retry if not ready yet (up to maxAttempts)
+        if (attempts < maxAttempts) {
+          setTimeout(initRecaptcha, 500)
+        }
         return
       }
 
@@ -71,18 +82,32 @@ export default function SellerSignupPage() {
             // reCAPTCHA verified
           },
           'expired-callback': () => {
+            setRecaptchaReady(false)
             setError('reCAPTCHA หมดอายุ กรุณารีเฟรชหน้า')
           }
         })
 
         // Pre-render the reCAPTCHA
-        recaptchaVerifier.render().catch(() => {
-          // Render error - will retry
-        })
+        recaptchaVerifier.render()
+          .then(() => {
+            setRecaptchaReady(true)
+          })
+          .catch(() => {
+            // Retry on render error
+            if (attempts < maxAttempts) {
+              setTimeout(initRecaptcha, 500)
+            }
+          })
       } catch {
-        // Failed to create verifier - will retry
+        // Retry on creation error
+        if (attempts < maxAttempts) {
+          setTimeout(initRecaptcha, 500)
+        }
       }
-    }, 1000) // Increased timeout
+    }
+
+    // Start initialization after a short delay
+    const timer = setTimeout(initRecaptcha, 300)
 
     return () => {
       clearTimeout(timer)
@@ -231,10 +256,10 @@ export default function SellerSignupPage() {
 
               <button
                 onClick={handleSendOTP}
-                disabled={loading || phone.length < 9}
+                disabled={loading || phone.length < 9 || !recaptchaReady}
                 className="w-full py-4 bg-black text-white font-semibold rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-neutral-800 transition-colors"
               >
-                {loading ? 'กำลังส่ง...' : 'ส่งรหัส OTP'}
+                {loading ? 'กำลังส่ง...' : !recaptchaReady ? 'กำลังโหลด...' : 'ส่งรหัส OTP'}
               </button>
 
               <p className="text-center text-secondary">
