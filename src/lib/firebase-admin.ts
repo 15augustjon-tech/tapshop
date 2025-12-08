@@ -26,8 +26,13 @@ export async function verifyFirebaseToken(idToken: string): Promise<DecodedIdTok
     const auth = getAuth(getAdminApp())
     const decodedToken = await auth.verifyIdToken(idToken)
     return decodedToken
-  } catch (error) {
-    console.error('Firebase token verification failed:', error)
+  } catch (error: any) {
+    console.error('Firebase token verification failed:', {
+      code: error?.code,
+      message: error?.message,
+      // Log first 50 chars of token for debugging (safe - doesn't expose full token)
+      tokenPrefix: idToken?.substring(0, 50) + '...'
+    })
     return null
   }
 }
