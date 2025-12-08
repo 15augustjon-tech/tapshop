@@ -472,13 +472,13 @@ export default function CheckoutAddressPage({ params }: Props) {
               )}
             </div>
 
-            {/* Save Address Checkbox */}
-            <label className="flex items-center gap-3 cursor-pointer">
+            {/* Save Address Checkbox - min 44px touch target */}
+            <label className="flex items-center gap-3 cursor-pointer min-h-[44px] py-2">
               <input
                 type="checkbox"
                 checked={saveAddressChecked}
                 onChange={(e) => setSaveAddressChecked(e.target.checked)}
-                className="w-5 h-5 rounded border-border"
+                className="w-6 h-6 rounded border-border accent-black"
               />
               <span>บันทึกที่อยู่นี้สำหรับครั้งหน้า</span>
             </label>

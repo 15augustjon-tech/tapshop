@@ -42,6 +42,10 @@ export async function POST(request: NextRequest) {
       process.env.SUPABASE_SERVICE_ROLE_KEY!
     )
 
+    // Check request type (signup creates new, login only allows existing)
+    const body_parsed = await request.clone().json()
+    const isSignupFlow = body_parsed.isSignup === true
+
     // Check if seller already exists
     const { data: existingSeller } = await supabase
       .from('sellers')
@@ -53,10 +57,10 @@ export async function POST(request: NextRequest) {
     let isNew = false
 
     if (existingSeller) {
-      // Existing seller - update firebase UID if needed
+      // Existing seller - use existing account
       seller = existingSeller
-    } else {
-      // Create new seller with phone
+    } else if (isSignupFlow) {
+      // Only create new seller if this is a signup flow
       const { data: newSeller, error: createError } = await supabase
         .from('sellers')
         .insert({
@@ -77,6 +81,13 @@ export async function POST(request: NextRequest) {
 
       seller = newSeller
       isNew = true
+    } else {
+      // Login flow but seller doesn't exist - return isNew without creating
+      return NextResponse.json({
+        success: true,
+        isNew: true,
+        seller: null
+      })
     }
 
     // Create session cookie

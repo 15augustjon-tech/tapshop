@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
+import ShopQRCode from '@/components/seller/ShopQRCode'
 
 export default function SuccessPage() {
   const [shopSlug, setShopSlug] = useState('')
@@ -48,7 +49,7 @@ export default function SuccessPage() {
         </div>
 
         {/* Heading */}
-        <h1 className="text-3xl font-bold mb-4">ร้านพร้อมใช้งาน!</h1>
+        <h1 className="text-3xl font-bold mb-4">ร้านพร้อมใช้งานแล้ว</h1>
 
         {/* Shop Link */}
         {shopSlug && (
@@ -77,7 +78,18 @@ export default function SuccessPage() {
           </div>
         )}
 
-        <p className="text-secondary mb-8">แชร์ลิงก์นี้ให้ลูกค้าของคุณ</p>
+        <p className="text-secondary mb-6">แชร์ลิงก์นี้ให้ลูกค้าของคุณ</p>
+
+        {/* QR Code Section */}
+        {shopSlug && (
+          <div className="mb-8 p-6 bg-neutral-50 rounded-xl">
+            <ShopQRCode
+              shopSlug={shopSlug}
+              size={180}
+              instruction="ลูกค้าสแกน QR เพื่อเข้าร้าน"
+            />
+          </div>
+        )}
 
         {/* Action Buttons */}
         <div className="space-y-3">

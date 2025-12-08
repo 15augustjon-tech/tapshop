@@ -131,6 +131,17 @@ const translations: Record<Language, Record<string, string>> = {
     'secure.teamHours': 'ทีมงานพร้อมให้บริการทุกวัน 9:00 - 21:00',
     'secure.ctaTitle': 'พร้อมเริ่มขายกับ TapShop?',
     'secure.ctaSubtitle': 'สร้างร้าน ไม่มีค่าใช้จ่ายรายเดือน',
+
+    // About Page
+    'about.title': 'เกี่ยวกับ TapShop',
+    'about.description': 'TapShop คือแพลตฟอร์มสำหรับคนขายของออนไลน์ ช่วยให้คุณสร้างร้าน รับออเดอร์ และจัดส่งสินค้าถึงลูกค้าได้ง่ายๆ โดยไม่ต้องตอบแชทหรือเรียกไรเดอร์เอง',
+    'about.contactTitle': 'ติดต่อเรา',
+    'about.hours': 'ทีมงานพร้อมให้บริการทุกวัน 9:00 - 21:00',
+
+    // Contact Page
+    'contact.title': 'ติดต่อเรา',
+    'contact.subtitle': 'มีคำถาม? ทีมงานพร้อมช่วยเหลือ',
+    'contact.hours': 'ทีมงานพร้อมให้บริการทุกวัน 9:00 - 21:00',
   },
   en: {
     // Navbar
@@ -138,7 +149,7 @@ const translations: Record<Language, Record<string, string>> = {
 
     // Hero
     'hero.title1': 'Sell Online',
-    'hero.title2': 'Deliver to Door',
+    'hero.title2': '',
     'hero.subtitle': 'Create shop, receive orders easily, auto delivery',
     'hero.cta': 'Create Shop',
 
@@ -252,6 +263,17 @@ const translations: Record<Language, Record<string, string>> = {
     'secure.teamHours': 'Team available daily 9:00 - 21:00',
     'secure.ctaTitle': 'Ready to sell with TapShop?',
     'secure.ctaSubtitle': 'Create shop, no monthly fees',
+
+    // About Page
+    'about.title': 'About TapShop',
+    'about.description': 'TapShop is a platform for selling online that helps you create a shop, receive orders, and deliver products to customers easily without replying to DMs or calling riders yourself.',
+    'about.contactTitle': 'Contact Us',
+    'about.hours': 'Team available daily 9:00 - 21:00',
+
+    // Contact Page
+    'contact.title': 'Contact Us',
+    'contact.subtitle': 'Have questions? Our team is ready to help',
+    'contact.hours': 'Team available daily 9:00 - 21:00',
   }
 }
 

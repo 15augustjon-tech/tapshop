@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import DashboardHeader from '@/components/seller/DashboardHeader'
+import ShopQRCode from '@/components/seller/ShopQRCode'
 import StatsCard from '@/components/seller/StatsCard'
 import TabBar from '@/components/seller/TabBar'
 import FilterPills from '@/components/seller/FilterPills'
@@ -66,6 +67,7 @@ export default function SellerDashboard() {
   const [loading, setLoading] = useState(true)
   const [confirmingAll, setConfirmingAll] = useState(false)
   const [refreshing, setRefreshing] = useState(false)
+  const [showQRModal, setShowQRModal] = useState(false)
 
   // Fetch seller data
   const fetchSeller = useCallback(async () => {
@@ -230,8 +232,21 @@ export default function SellerDashboard() {
   return (
     <div className="min-h-screen bg-white">
       <div className="px-[5%] pb-24">
-        {/* Header */}
-        <DashboardHeader shopName={seller?.shop_name || ''} />
+        {/* Header with QR Button */}
+        <div className="flex items-center justify-between">
+          <div className="flex-1">
+            <DashboardHeader shopName={seller?.shop_name || ''} />
+          </div>
+          <button
+            onClick={() => setShowQRModal(true)}
+            className="p-2 hover:bg-neutral-100 rounded-full transition-colors ml-2"
+            title="แชร์ร้านของคุณ"
+          >
+            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z" />
+            </svg>
+          </button>
+        </div>
 
         {/* Stats */}
         <div className="mb-6">
@@ -328,6 +343,49 @@ export default function SellerDashboard() {
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
         </svg>
       </Link>
+
+      {/* QR Code Modal */}
+      {showQRModal && (
+        <div
+          className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4"
+          onClick={() => setShowQRModal(false)}
+        >
+          <div
+            className="bg-white rounded-2xl p-6 w-full max-w-sm relative"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Close Button */}
+            <button
+              onClick={() => setShowQRModal(false)}
+              className="absolute top-4 right-4 p-1 hover:bg-neutral-100 rounded-full transition-colors"
+            >
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+
+            {/* Title */}
+            <h2 className="text-xl font-bold text-center mb-6">แชร์ร้านของคุณ</h2>
+
+            {/* QR Code Component */}
+            {seller?.shop_slug && (
+              <ShopQRCode
+                shopSlug={seller.shop_slug}
+                size={200}
+                instruction="ลูกค้าสแกน QR เพื่อเข้าร้าน"
+              />
+            )}
+
+            {/* Close Button at Bottom */}
+            <button
+              onClick={() => setShowQRModal(false)}
+              className="w-full mt-6 py-3 border border-border rounded-lg font-medium hover:bg-neutral-50 transition-colors"
+            >
+              ปิด
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

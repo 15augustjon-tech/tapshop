@@ -21,7 +21,7 @@ export default function ProductGrid({ products, onProductClick }: ProductGridPro
   }
 
   return (
-    <div className="px-4 py-4 pb-24 md:px-[5%]">
+    <div className="px-4 py-4 pb-20 md:px-[5%]">
       {/* Grid: 2 columns mobile, 3 columns desktop */}
       <div className="grid grid-cols-2 gap-3 md:grid-cols-3 md:gap-4">
         {products.map(product => (
