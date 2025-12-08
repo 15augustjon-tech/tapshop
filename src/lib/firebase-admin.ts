@@ -12,9 +12,23 @@ function getAdminApp(): App {
       throw new Error('FIREBASE_SERVICE_ACCOUNT_KEY not configured')
     }
 
-    adminApp = initializeApp({
-      credential: cert(JSON.parse(serviceAccount))
-    })
+    try {
+      // Trim any whitespace that might have been added
+      const trimmed = serviceAccount.trim()
+      const parsed = JSON.parse(trimmed)
+      console.log('Firebase Admin: Initializing with project_id:', parsed.project_id)
+      adminApp = initializeApp({
+        credential: cert(parsed)
+      })
+    } catch (parseError: any) {
+      console.error('Firebase Admin: Failed to parse service account JSON:', {
+        error: parseError.message,
+        keyLength: serviceAccount.length,
+        firstChars: serviceAccount.substring(0, 50),
+        lastChars: serviceAccount.substring(serviceAccount.length - 50)
+      })
+      throw new Error('Invalid FIREBASE_SERVICE_ACCOUNT_KEY JSON: ' + parseError.message)
+    }
   }
 
   return adminApp || getApps()[0]

@@ -43,8 +43,7 @@ export async function POST(request: NextRequest) {
     )
 
     // Check request type (signup creates new, login only allows existing)
-    const body_parsed = await request.clone().json()
-    const isSignupFlow = body_parsed.isSignup === true
+    const isSignupFlow = body.isSignup === true
 
     // Check if seller already exists
     const { data: existingSeller } = await supabase
@@ -127,10 +126,19 @@ export async function POST(request: NextRequest) {
       redirectTo
     })
 
-  } catch (error) {
-    console.error('Firebase verify error:', error)
+  } catch (error: any) {
+    console.error('Firebase verify error:', {
+      message: error?.message,
+      code: error?.code,
+      stack: error?.stack?.substring(0, 500)
+    })
     return NextResponse.json(
-      { success: false, error: 'server_error', message: 'เกิดข้อผิดพลาด กรุณาลองใหม่' },
+      {
+        success: false,
+        error: 'server_error',
+        message: 'เกิดข้อผิดพลาด กรุณาลองใหม่',
+        debug: process.env.NODE_ENV === 'development' ? error?.message : undefined
+      },
       { status: 500 }
     )
   }
