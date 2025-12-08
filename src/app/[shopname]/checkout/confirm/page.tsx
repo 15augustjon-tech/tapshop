@@ -213,7 +213,12 @@ export default function CheckoutConfirmPage({ params }: Props) {
       {/* Submit Button */}
       <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-border px-[5%] py-4 safe-area-bottom">
         <button
-          onClick={handleSubmit}
+          onClick={() => {
+            // Confirm before submitting high-value order
+            if (confirm(`ยืนยันสั่งซื้อ ฿${total.toLocaleString()} ใช่หรือไม่?`)) {
+              handleSubmit()
+            }
+          }}
           disabled={submitting}
           className="w-full py-4 bg-black text-white font-semibold rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-neutral-800 transition-colors"
         >

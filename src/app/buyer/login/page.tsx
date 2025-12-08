@@ -9,7 +9,9 @@ type Step = 'phone' | 'otp'
 function BuyerLoginContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
-  const redirect = searchParams.get('redirect') || '/buyer/account'
+  // Validate redirect to prevent open redirect vulnerability
+  const rawRedirect = searchParams.get('redirect') || '/buyer/account'
+  const redirect = rawRedirect.startsWith('/') && !rawRedirect.startsWith('//') ? rawRedirect : '/buyer/account'
 
   const [step, setStep] = useState<Step>('phone')
   const [phone, setPhone] = useState('')

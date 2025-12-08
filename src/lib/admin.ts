@@ -17,17 +17,17 @@ export function isAdminPhone(phone: string): boolean {
   return normalizedAdmin === normalizedPhone
 }
 
-// Get authenticated admin from cookies (uses seller auth)
+// Get authenticated admin from cookies (uses admin_session cookie)
 export async function getAuthenticatedAdmin(): Promise<{
   success: boolean
-  seller?: { id: string; phone: string; shop_name: string }
+  admin?: { email: string }
   error?: string
 }> {
   try {
     const cookieStore = await cookies()
-    const sellerSession = cookieStore.get('seller_session')
+    const adminSession = cookieStore.get('admin_session')
 
-    if (!sellerSession?.value) {
+    if (!adminSession?.value) {
       return { success: false, error: 'not_authenticated' }
     }
 
@@ -36,39 +36,31 @@ export async function getAuthenticatedAdmin(): Promise<{
       process.env.SUPABASE_SERVICE_ROLE_KEY!
     )
 
-    // Verify session
-    const { data: session, error: sessionError } = await supabase
-      .from('seller_sessions')
-      .select('seller_id, expires_at')
-      .eq('token', sellerSession.value)
+    // Verify session against admin_settings table
+    const { data: settings, error: settingsError } = await supabase
+      .from('admin_settings')
+      .select('session_token, session_expires')
+      .eq('id', 'admin')
       .single()
 
-    if (sessionError || !session) {
+    if (settingsError || !settings) {
+      return { success: false, error: 'invalid_session' }
+    }
+
+    // Check token matches
+    if (settings.session_token !== adminSession.value) {
       return { success: false, error: 'invalid_session' }
     }
 
     // Check expiry
-    if (new Date(session.expires_at) < new Date()) {
+    if (settings.session_expires && new Date(settings.session_expires) < new Date()) {
       return { success: false, error: 'session_expired' }
     }
 
-    // Get seller info
-    const { data: seller, error: sellerError } = await supabase
-      .from('sellers')
-      .select('id, phone, shop_name')
-      .eq('id', session.seller_id)
-      .single()
-
-    if (sellerError || !seller) {
-      return { success: false, error: 'seller_not_found' }
+    return {
+      success: true,
+      admin: { email: process.env.ADMIN_EMAIL || 'admin' }
     }
-
-    // Check if admin
-    if (!isAdminPhone(seller.phone)) {
-      return { success: false, error: 'not_admin' }
-    }
-
-    return { success: true, seller }
   } catch {
     return { success: false, error: 'auth_error' }
   }
