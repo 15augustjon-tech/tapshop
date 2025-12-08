@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { useRouter } from 'next/navigation'
 
 interface Stats {
   ordersToday: number
@@ -48,6 +49,7 @@ const STATUS_LABELS: Record<string, string> = {
 }
 
 export default function AdminDashboard() {
+  const router = useRouter()
   const [activeTab, setActiveTab] = useState<'orders' | 'sellers' | 'revenue'>('orders')
   const [showCancelModal, setShowCancelModal] = useState<string | null>(null)
   const [stats, setStats] = useState<Stats | null>(null)
@@ -55,19 +57,43 @@ export default function AdminDashboard() {
   const [sellers, setSellers] = useState<Seller[]>([])
   const [loading, setLoading] = useState(true)
   const [statusFilter, setStatusFilter] = useState('')
+  const [authChecked, setAuthChecked] = useState(false)
+
+  // Check authentication
+  useEffect(() => {
+    fetch('/api/admin/auth/check')
+      .then(res => {
+        if (!res.ok) {
+          router.push('/admin/login')
+        } else {
+          setAuthChecked(true)
+        }
+      })
+      .catch(() => {
+        router.push('/admin/login')
+      })
+  }, [router])
+
+  // Handle logout
+  const handleLogout = async () => {
+    await fetch('/api/admin/auth/logout', { method: 'POST' })
+    router.push('/admin/login')
+  }
 
   // Load stats
   useEffect(() => {
+    if (!authChecked) return
     fetch('/api/admin/stats')
       .then(res => res.json())
       .then(data => {
         if (data.success) setStats(data.stats)
       })
       .catch(() => {})
-  }, [])
+  }, [authChecked])
 
   // Load data based on active tab
   useEffect(() => {
+    if (!authChecked) return
     setLoading(true)
     if (activeTab === 'orders') {
       const url = statusFilter
@@ -91,7 +117,7 @@ export default function AdminDashboard() {
     } else {
       setLoading(false)
     }
-  }, [activeTab, statusFilter])
+  }, [activeTab, statusFilter, authChecked])
 
   const handleCancelOrder = async (orderId: string) => {
     const res = await fetch(`/api/admin/orders/${orderId}/cancel`, { method: 'POST' })
@@ -120,8 +146,31 @@ export default function AdminDashboard() {
     return colors[status] || 'bg-gray-100 text-gray-800'
   }
 
+  // Show loading while checking auth
+  if (!authChecked) {
+    return (
+      <div className="min-h-screen bg-gray-100 flex items-center justify-center">
+        <div className="text-gray-500">กำลังโหลด...</div>
+      </div>
+    )
+  }
+
   return (
-    <div className="space-y-6">
+    <div className="min-h-screen bg-gray-100">
+      {/* Header */}
+      <header className="bg-white shadow-sm">
+        <div className="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
+          <h1 className="text-xl font-bold">TapShop Admin</h1>
+          <button
+            onClick={handleLogout}
+            className="text-sm text-gray-500 hover:text-gray-700"
+          >
+            ออกจากระบบ
+          </button>
+        </div>
+      </header>
+
+      <main className="max-w-7xl mx-auto px-4 py-6 space-y-6">
       {/* Cancel Confirmation Modal */}
       {showCancelModal && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
@@ -348,6 +397,7 @@ export default function AdminDashboard() {
           )}
         </div>
       </div>
+      </main>
     </div>
   )
 }
