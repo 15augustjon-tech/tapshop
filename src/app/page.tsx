@@ -39,8 +39,7 @@ export default function LandingPage() {
         <div className="max-w-4xl mx-auto text-center">
           <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold mb-6">
             {t('hero.title1')}
-            <br />
-            {t('hero.title2')}
+            {t('hero.title2') && <><br />{t('hero.title2')}</>}
           </h1>
           <p className="text-lg md:text-xl text-gray-600 mb-10 max-w-2xl mx-auto">
             {t('hero.subtitle')}
@@ -119,14 +118,15 @@ export default function LandingPage() {
           <h2 className="text-3xl md:text-4xl font-bold text-center mb-16">{t('features.title')}</h2>
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-8">
             {[
-              { icon: '💬', text: t('features.noDM') },
-              { icon: '📝', text: t('features.noAddress') },
-              { icon: '🛵', text: t('features.noGrab') },
-              { icon: '💵', text: t('features.cod') }
+              { icon: '💬', title: t('features.noDM'), desc: t('features.noDMDesc') },
+              { icon: '📝', title: t('features.noAddress'), desc: t('features.noAddressDesc') },
+              { icon: '🛵', title: t('features.noGrab'), desc: t('features.noGrabDesc') },
+              { icon: '💵', title: t('features.cod'), desc: t('features.codDesc') }
             ].map((feature, i) => (
               <div key={i} className="text-center p-6">
                 <div className="text-4xl mb-4">{feature.icon}</div>
-                <p className="text-lg font-medium">{feature.text}</p>
+                <p className="text-lg font-medium mb-2">{feature.title}</p>
+                <p className="text-sm text-gray-400">{feature.desc}</p>
               </div>
             ))}
           </div>
@@ -142,7 +142,8 @@ export default function LandingPage() {
             <p className="text-xl text-gray-600 mb-6">{t('pricing.noFees')}</p>
             <div className="border-t border-gray-200 pt-6 mt-6">
               <p className="text-lg mb-2">{t('pricing.payWhen')}</p>
-              <p className="text-2xl font-bold">{t('pricing.perOrder')}</p>
+              <p className="text-2xl font-bold mb-2">{t('pricing.perOrder')}</p>
+              {t('pricing.auto') && <p className="text-gray-600">{t('pricing.auto')}</p>}
             </div>
             <div className="mt-8">
               <Link

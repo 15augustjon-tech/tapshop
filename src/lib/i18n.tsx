@@ -13,67 +13,71 @@ interface I18nContextType {
 const translations: Record<Language, Record<string, string>> = {
   th: {
     // Navbar
-    'nav.createShop': 'สร้างร้าน',
+    'nav.createShop': 'เปิดร้านเลย',
 
     // Hero
-    'hero.title1': 'ขายของออนไลน์',
-    'hero.title2': 'ส่งถึงบ้าน',
-    'hero.subtitle': 'สร้างร้าน รับออเดอร์ง่าย ส่งของอัตโนมัติ',
-    'hero.cta': 'สร้างร้าน',
+    'hero.title1': 'ร้านออนไลน์ของคุณ',
+    'hero.title2': '',
+    'hero.subtitle': 'สร้างร้าน รับออเดอร์ จัดส่ง — จบในลิงก์เดียว',
+    'hero.cta': 'เปิดร้านเลย',
 
     // Value Props
-    'value.setup.title': 'ตั้งร้าน 5 นาที',
-    'value.setup.desc': 'ใส่ข้อมูล เพิ่มสินค้า พร้อมขายทันที',
-    'value.order.title': 'ลูกค้าสั่งเอง',
-    'value.order.desc': 'ไม่ต้องตอบแชท ไม่ต้องจดที่อยู่',
-    'value.delivery.title': 'เราส่งให้',
-    'value.delivery.desc': 'ไรเดอร์รับของถึงหน้าบ้าน ส่งถึงลูกค้า',
+    'value.setup.title': 'พร้อมขายใน 5 นาที',
+    'value.setup.desc': 'เพิ่มสินค้า ตั้งราคา เริ่มขายได้เลย',
+    'value.order.title': 'ลูกค้าสั่งซื้อเอง',
+    'value.order.desc': 'ไม่ต้องตอบแชท ไม่ต้องจดออเดอร์',
+    'value.delivery.title': 'เราจัดส่งให้',
+    'value.delivery.desc': 'รับของถึงหน้าบ้าน ส่งถึงมือลูกค้า',
 
     // How it works
     'how.title': 'วิธีใช้งาน',
     'how.step1.title': 'สร้างร้าน',
-    'how.step1.desc': 'ใส่ข้อมูลร้าน เพิ่มรูปสินค้า ตั้งราคา เสร็จใน 5 นาที',
+    'how.step1.desc': 'เพิ่มสินค้า ตั้งราคา รับลิงก์ร้านของคุณ',
     'how.step2.title': 'แชร์ลิงก์',
-    'how.step2.desc': 'ส่งลิงก์ร้านให้ลูกค้าทาง IG, Facebook, LINE',
+    'how.step2.desc': 'โพสต์ใน Instagram, Facebook, LINE ได้ทุกที่',
     'how.step3.title': 'เราจัดส่ง',
-    'how.step3.desc': 'ไรเดอร์มารับของถึงบ้าน ส่งให้ลูกค้า เก็บเงินให้',
+    'how.step3.desc': 'ไรเดอร์รับของจากคุณ ส่งถึงลูกค้า เก็บเงินให้',
 
     // Features
-    'features.title': 'เราจัดการให้หมด',
-    'features.noDM': 'ไม่ต้องตอบ DM',
+    'features.title': 'ออกแบบมาเพื่อคนขายของ',
+    'features.noDM': 'ลูกค้าสั่งซื้อเอง',
+    'features.noDMDesc': 'เลือกสินค้า กรอกที่อยู่ เสร็จ',
     'features.noAddress': 'ไม่ต้องจดที่อยู่',
-    'features.noGrab': 'เราส่งให้เลย',
-    'features.cod': 'เก็บเงินปลายทางได้',
+    'features.noAddressDesc': 'ระบบบันทึกให้อัตโนมัติ',
+    'features.noGrab': 'เราจัดส่งให้',
+    'features.noGrabDesc': 'ไรเดอร์รับ-ส่งของทุกวัน',
+    'features.cod': 'เก็บเงินปลายทาง',
+    'features.codDesc': 'ลูกค้าจ่ายเงินให้ไรเดอร์ คุณได้รับเงินหลังส่งสำเร็จ',
 
     // Pricing
-    'pricing.title': 'ราคา',
-    'pricing.free': 'ฟรี',
-    'pricing.noFees': 'ไม่มีค่าสมัคร ไม่มีค่ารายเดือน',
-    'pricing.payWhen': 'เราจัดส่งให้',
-    'pricing.perOrder': 'คุณขาย เราส่ง',
-    'pricing.auto': '',
-    'pricing.cta': 'เริ่มต้นเลย',
+    'pricing.title': 'ค่าใช้จ่าย',
+    'pricing.free': 'ไม่มีค่ารายเดือน',
+    'pricing.noFees': 'จ่ายค่าส่งเมื่อมีออเดอร์',
+    'pricing.payWhen': 'ค่าส่งคิดตามระยะทาง',
+    'pricing.perOrder': 'เก็บเงินปลายทางรวมแล้ว',
+    'pricing.auto': 'ไม่มีค่าใช้จ่ายแอบแฝง',
+    'pricing.cta': 'เปิดร้านเลย',
 
     // FAQ
     'faq.title': 'คำถามที่พบบ่อย',
     'faq.q1': 'TapShop คืออะไร?',
-    'faq.a1': 'TapShop คือแพลตฟอร์มสำหรับขายของออนไลน์ ที่ช่วยให้คุณสร้างร้านค้า รับออเดอร์ และจัดส่งสินค้าถึงลูกค้าได้ง่ายๆ โดยไม่ต้องตอบ DM หรือเรียกไรเดอร์เอง',
+    'faq.a1': 'TapShop คือร้านออนไลน์พร้อมระบบจัดส่งในตัว คุณสร้างร้าน เพิ่มสินค้า แชร์ลิงก์ ลูกค้าสั่งซื้อเอง เราจัดส่งและเก็บเงินให้',
     'faq.q2': 'ค่าใช้จ่ายเท่าไหร่?',
-    'faq.a2': 'ใช้ฟรี ไม่มีค่ารายเดือน จ่ายแค่ค่าส่งตอนมีออเดอร์ — เราจัดการให้หมด',
-    'faq.q3': 'รับส่งพื้นที่ไหนบ้าง?',
-    'faq.a3': 'กรุงเทพและปริมณฑลทั้งหมด ส่งทุกวัน',
+    'faq.a2': 'สร้างร้านฟรี ไม่มีค่ารายเดือน จ่ายแค่ค่าส่งเมื่อมีออเดอร์',
+    'faq.q3': 'จัดส่งพื้นที่ไหนบ้าง?',
+    'faq.a3': 'กรุงเทพและปริมณฑล',
     'faq.q4': 'ลูกค้าจ่ายเงินยังไง?',
-    'faq.a4': 'ลูกค้าจ่ายเงินสดให้ไรเดอร์ตอนรับของ (เก็บเงินปลายทาง/COD) เราจะโอนเงินให้คุณหลังจัดส่งสำเร็จ',
+    'faq.a4': 'เก็บเงินปลายทาง ไรเดอร์เก็บเงินตอนส่งของ คุณได้รับเงินภายใน 2 วัน',
     'faq.q5': 'มีปัญหาติดต่อยังไง?',
-    'faq.a5': 'แอดไลน์ @tapshop หรืออีเมล support@tapshop.me ทีมงานพร้อมช่วยเหลือทุกวัน 9:00-21:00',
+    'faq.a5': 'LINE @tapshop หรือ support@tapshop.me ทีมงานพร้อมช่วยเหลือทุกวัน 9:00-21:00',
 
     // CTA
     'cta.title': 'พร้อมเริ่มขาย?',
-    'cta.subtitle': 'สร้างร้านได้เลย ไม่มีค่าใช้จ่าย',
-    'cta.button': 'สร้างร้านวันนี้',
+    'cta.subtitle': 'สร้างร้านได้ใน 5 นาที',
+    'cta.button': 'เปิดร้านเลย',
 
     // Footer
-    'footer.tagline': 'ขายของออนไลน์ ส่งถึงบ้าน',
+    'footer.tagline': 'ร้านออนไลน์พร้อมจัดส่ง',
     'footer.links': 'ลิงก์',
     'footer.about': 'เกี่ยวกับเรา',
     'footer.security': 'ความปลอดภัย',
@@ -156,11 +160,15 @@ const translations: Record<Language, Record<string, string>> = {
     'how.step3.desc': 'Rider picks up from your home, delivers, collects payment',
 
     // Features
-    'features.title': 'We deliver for you',
-    'features.noDM': 'No DM replies',
+    'features.title': 'Built for sellers',
+    'features.noDM': 'Customers order themselves',
+    'features.noDMDesc': 'Pick items, enter address, done',
     'features.noAddress': 'No address notes',
+    'features.noAddressDesc': 'System saves automatically',
     'features.noGrab': 'We deliver for you',
+    'features.noGrabDesc': 'Riders pick up and deliver daily',
     'features.cod': 'Cash on delivery',
+    'features.codDesc': 'Customer pays rider, you get paid after delivery',
 
     // Pricing
     'pricing.title': 'Pricing',
@@ -168,8 +176,8 @@ const translations: Record<Language, Record<string, string>> = {
     'pricing.noFees': 'No signup fee, no monthly fee',
     'pricing.payWhen': 'We handle delivery',
     'pricing.perOrder': 'You sell, we deliver',
-    'pricing.auto': '',
-    'pricing.cta': 'Get Started',
+    'pricing.auto': 'No hidden fees',
+    'pricing.cta': 'Create Shop',
 
     // FAQ
     'faq.title': 'Frequently Asked Questions',
