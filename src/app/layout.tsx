@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Inter, Noto_Sans_Thai } from "next/font/google";
 import "./globals.css";
+import { I18nProvider } from "@/lib/i18n";
 
 // English font
 const inter = Inter({
@@ -39,7 +40,9 @@ export default function RootLayout({
       <body
         className={`${inter.variable} ${notoSansThai.variable} font-sans antialiased bg-white text-black`}
       >
-        {children}
+        <I18nProvider>
+          {children}
+        </I18nProvider>
       </body>
     </html>
   );
