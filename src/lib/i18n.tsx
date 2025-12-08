@@ -295,7 +295,8 @@ export function I18nProvider({ children }: { children: ReactNode }) {
   }
 
   const t = (key: string): string => {
-    return translations[lang][key] || key
+    const value = translations[lang][key]
+    return value !== undefined ? value : key
   }
 
   return (
