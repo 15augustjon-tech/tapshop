@@ -143,7 +143,6 @@ export default function LandingPage() {
             <div className="border-t border-gray-200 pt-6 mt-6">
               <p className="text-lg mb-2">{t('pricing.payWhen')}</p>
               <p className="text-2xl font-bold">{t('pricing.perOrder')}</p>
-              <p className="text-sm text-gray-500 mt-2">{t('pricing.auto')}</p>
             </div>
             <div className="mt-8">
               <Link

@@ -39,19 +39,19 @@ const translations: Record<Language, Record<string, string>> = {
     'how.step3.desc': 'ไรเดอร์มารับของถึงบ้าน ส่งให้ลูกค้า เก็บเงินให้',
 
     // Features
-    'features.title': 'ไม่ต้องทำเอง',
+    'features.title': 'เราจัดการให้หมด',
     'features.noDM': 'ไม่ต้องตอบ DM',
     'features.noAddress': 'ไม่ต้องจดที่อยู่',
-    'features.noGrab': 'ไม่ต้องเรียก Grab เอง',
+    'features.noGrab': 'เราส่งให้เลย',
     'features.cod': 'เก็บเงินปลายทางได้',
 
     // Pricing
     'pricing.title': 'ราคา',
     'pricing.free': 'ฟรี',
     'pricing.noFees': 'ไม่มีค่าสมัคร ไม่มีค่ารายเดือน',
-    'pricing.payWhen': 'จ่ายแค่ค่าส่งตอนมีออเดอร์',
-    'pricing.perOrder': 'ราคาตามระยะทาง',
-    'pricing.auto': 'หักจากยอด COD อัตโนมัติ',
+    'pricing.payWhen': 'เราจัดส่งให้',
+    'pricing.perOrder': 'คุณขาย เราส่ง',
+    'pricing.auto': '',
     'pricing.cta': 'เริ่มต้นเลย',
 
     // FAQ
@@ -59,9 +59,9 @@ const translations: Record<Language, Record<string, string>> = {
     'faq.q1': 'TapShop คืออะไร?',
     'faq.a1': 'TapShop คือแพลตฟอร์มสำหรับขายของออนไลน์ ที่ช่วยให้คุณสร้างร้านค้า รับออเดอร์ และจัดส่งสินค้าถึงลูกค้าได้ง่ายๆ โดยไม่ต้องตอบ DM หรือเรียกไรเดอร์เอง',
     'faq.q2': 'ค่าใช้จ่ายเท่าไหร่?',
-    'faq.a2': 'สมัครฟรี ไม่มีค่ารายเดือน จ่ายแค่ค่าส่งตามระยะทาง (หักจากยอดเก็บเงินปลายทาง)',
+    'faq.a2': 'ใช้ฟรี ไม่มีค่ารายเดือน จ่ายแค่ค่าส่งตอนมีออเดอร์ — เราจัดการให้หมด',
     'faq.q3': 'รับส่งพื้นที่ไหนบ้าง?',
-    'faq.a3': 'ปัจจุบันรับส่งในกรุงเทพและปริมณฑล รัศมี 20 กม. จากร้านค้า กำลังขยายพื้นที่เร็วๆ นี้',
+    'faq.a3': 'กรุงเทพและปริมณฑลทั้งหมด ส่งทุกวัน',
     'faq.q4': 'ลูกค้าจ่ายเงินยังไง?',
     'faq.a4': 'ลูกค้าจ่ายเงินสดให้ไรเดอร์ตอนรับของ (เก็บเงินปลายทาง/COD) เราจะโอนเงินให้คุณหลังจัดส่งสำเร็จ',
     'faq.q5': 'มีปัญหาติดต่อยังไง?',
@@ -156,19 +156,19 @@ const translations: Record<Language, Record<string, string>> = {
     'how.step3.desc': 'Rider picks up from your home, delivers, collects payment',
 
     // Features
-    'features.title': 'No need to do it yourself',
+    'features.title': 'We deliver for you',
     'features.noDM': 'No DM replies',
     'features.noAddress': 'No address notes',
-    'features.noGrab': 'No calling Grab',
+    'features.noGrab': 'We deliver for you',
     'features.cod': 'Cash on delivery',
 
     // Pricing
     'pricing.title': 'Pricing',
     'pricing.free': 'Free',
     'pricing.noFees': 'No signup fee, no monthly fee',
-    'pricing.payWhen': 'Pay only delivery when you have orders',
-    'pricing.perOrder': 'Price based on distance',
-    'pricing.auto': 'Auto deducted from COD',
+    'pricing.payWhen': 'We handle delivery',
+    'pricing.perOrder': 'You sell, we deliver',
+    'pricing.auto': '',
     'pricing.cta': 'Get Started',
 
     // FAQ
@@ -176,9 +176,9 @@ const translations: Record<Language, Record<string, string>> = {
     'faq.q1': 'What is TapShop?',
     'faq.a1': 'TapShop is a platform for selling online that helps you create a shop, receive orders, and deliver products to customers easily without replying to DMs or calling riders yourself.',
     'faq.q2': 'How much does it cost?',
-    'faq.a2': 'Free to sign up, no monthly fees. Pay only delivery based on distance (deducted from COD amount).',
+    'faq.a2': 'Free to use. No monthly fees. You only pay for delivery when you have orders — we handle everything.',
     'faq.q3': 'What areas do you deliver?',
-    'faq.a3': 'Currently delivering in Bangkok and surrounding areas within 20km radius from shop. Expanding soon.',
+    'faq.a3': 'All of Bangkok and surrounding areas. Delivery daily.',
     'faq.q4': 'How do customers pay?',
     'faq.a4': 'Customers pay cash to rider on delivery (COD). We transfer money to you after successful delivery.',
     'faq.q5': 'How to contact support?',
