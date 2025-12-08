@@ -1,6 +1,6 @@
 // Firebase configuration for TapShop
-import { initializeApp, getApps, getApp } from 'firebase/app'
-import { getAuth, RecaptchaVerifier, signInWithPhoneNumber, ConfirmationResult } from 'firebase/auth'
+import { initializeApp, getApps, getApp, FirebaseApp } from 'firebase/app'
+import { getAuth, RecaptchaVerifier, signInWithPhoneNumber, ConfirmationResult, Auth } from 'firebase/auth'
 
 const firebaseConfig = {
   apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
@@ -11,12 +11,15 @@ const firebaseConfig = {
   appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
 }
 
-// Initialize Firebase (prevent multiple instances)
-const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApp()
-const auth = getAuth(app)
+// Only initialize Firebase on the client side
+let app: FirebaseApp | undefined
+let auth: Auth | undefined
 
-// Set language to Thai
-auth.languageCode = 'th'
+if (typeof window !== 'undefined') {
+  app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApp()
+  auth = getAuth(app)
+  auth.languageCode = 'th'
+}
 
 export { auth, RecaptchaVerifier, signInWithPhoneNumber }
 export type { ConfirmationResult }

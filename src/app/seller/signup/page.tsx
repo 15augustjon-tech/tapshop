@@ -60,7 +60,7 @@ export default function SellerSignupPage() {
     // Wait for DOM to be ready (longer timeout for safety)
     const timer = setTimeout(() => {
       const container = document.getElementById('recaptcha-container')
-      if (!container) {
+      if (!container || !auth) {
         return
       }
 
@@ -95,7 +95,7 @@ export default function SellerSignupPage() {
       return
     }
 
-    if (!recaptchaVerifier) {
+    if (!recaptchaVerifier || !auth) {
       setError('กรุณารอสักครู่แล้วลองใหม่')
       return
     }
