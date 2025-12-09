@@ -1,88 +1,85 @@
-import messagebird from 'messagebird'
-
-// Initialize MessageBird client
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const client = (messagebird as any).initClient(process.env.MESSAGEBIRD_API_KEY || '')
-
-interface VerifyCreateResponse {
-  id: string
-  href: string
-  recipient: string
-  reference: string | null
-  messages: {
-    href: string
-  }
-  status: string
-  createdDatetime: string
-  validUntilDatetime: string
-}
-
-interface VerifyResponse {
-  id: string
-  href: string
-  recipient: string
-  reference: string | null
-  status: string
-  createdDatetime: string
-  validUntilDatetime: string
-}
+// Twilio Verify API
+const TWILIO_ACCOUNT_SID = process.env.TWILIO_ACCOUNT_SID || ''
+const TWILIO_AUTH_TOKEN = process.env.TWILIO_AUTH_TOKEN || ''
+const TWILIO_VERIFY_SERVICE_SID = process.env.TWILIO_VERIFY_SERVICE_SID || ''
 
 /**
- * Send OTP via MessageBird Verify API
- * Returns verification ID to use for verification
+ * Send OTP via Twilio Verify API
  */
 export async function sendOTP(phone: string): Promise<{ success: boolean; verifyId?: string; error?: string }> {
-  return new Promise((resolve) => {
-    // MessageBird expects E.164 format
+  try {
+    // Twilio expects E.164 format
     const formattedPhone = phone.startsWith('+') ? phone : `+${phone}`
 
-    client.verify.create(formattedPhone, {
-      originator: 'TapShop',
-      template: 'รหัส OTP ของคุณคือ %token',
-      timeout: 300, // 5 minutes
-      tokenLength: 6,
-      type: 'sms'
-    }, (err: Error | null, response: VerifyCreateResponse) => {
-      if (err) {
-        console.error('MessageBird send error:', err)
-        resolve({ success: false, error: 'ส่ง OTP ไม่สำเร็จ' })
-        return
+    const response = await fetch(
+      `https://verify.twilio.com/v2/Services/${TWILIO_VERIFY_SERVICE_SID}/Verifications`,
+      {
+        method: 'POST',
+        headers: {
+          'Authorization': 'Basic ' + Buffer.from(`${TWILIO_ACCOUNT_SID}:${TWILIO_AUTH_TOKEN}`).toString('base64'),
+          'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: new URLSearchParams({
+          To: formattedPhone,
+          Channel: 'sms'
+        }).toString()
       }
+    )
 
-      resolve({ success: true, verifyId: response.id })
-    })
-  })
+    const data = await response.json()
+
+    if (!response.ok) {
+      console.error('Twilio send error:', JSON.stringify(data, null, 2))
+      return { success: false, error: data.message || 'ส่ง OTP ไม่สำเร็จ' }
+    }
+
+    // Twilio Verify uses the phone number as the identifier, not a separate ID
+    return { success: true, verifyId: formattedPhone }
+  } catch (error) {
+    console.error('Twilio send exception:', error)
+    return { success: false, error: 'ส่ง OTP ไม่สำเร็จ' }
+  }
 }
 
 /**
- * Verify OTP via MessageBird Verify API
+ * Verify OTP via Twilio Verify API
  */
-export async function verifyOTP(verifyId: string, token: string): Promise<{ success: boolean; error?: string }> {
-  return new Promise((resolve) => {
-    client.verify.verify(verifyId, token, (err: Error | null, response: VerifyResponse) => {
-      if (err) {
-        const mbError = err as Error & { statusCode?: number }
-        console.error('MessageBird verify error:', err)
+export async function verifyOTP(phone: string, code: string): Promise<{ success: boolean; error?: string }> {
+  try {
+    const response = await fetch(
+      `https://verify.twilio.com/v2/Services/${TWILIO_VERIFY_SERVICE_SID}/VerificationCheck`,
+      {
+        method: 'POST',
+        headers: {
+          'Authorization': 'Basic ' + Buffer.from(`${TWILIO_ACCOUNT_SID}:${TWILIO_AUTH_TOKEN}`).toString('base64'),
+          'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: new URLSearchParams({
+          To: phone,
+          Code: code
+        }).toString()
+      }
+    )
 
-        // Handle specific error codes
-        if (mbError.statusCode === 422) {
-          resolve({ success: false, error: 'รหัส OTP ไม่ถูกต้อง' })
-          return
-        }
-        if (mbError.statusCode === 404) {
-          resolve({ success: false, error: 'รหัส OTP หมดอายุ กรุณาขอใหม่' })
-          return
-        }
+    const data = await response.json()
 
-        resolve({ success: false, error: 'ตรวจสอบ OTP ไม่สำเร็จ' })
-        return
+    if (!response.ok) {
+      console.error('Twilio verify error:', JSON.stringify(data, null, 2))
+
+      if (data.code === 20404) {
+        return { success: false, error: 'รหัส OTP หมดอายุ กรุณาขอใหม่' }
       }
 
-      if (response.status === 'verified') {
-        resolve({ success: true })
-      } else {
-        resolve({ success: false, error: 'รหัส OTP ไม่ถูกต้อง' })
-      }
-    })
-  })
+      return { success: false, error: 'รหัส OTP ไม่ถูกต้อง' }
+    }
+
+    if (data.status === 'approved') {
+      return { success: true }
+    } else {
+      return { success: false, error: 'รหัส OTP ไม่ถูกต้อง' }
+    }
+  } catch (error) {
+    console.error('Twilio verify exception:', error)
+    return { success: false, error: 'ตรวจสอบ OTP ไม่สำเร็จ' }
+  }
 }

@@ -30,38 +30,8 @@ export async function POST(request: NextRequest) {
       process.env.SUPABASE_SERVICE_ROLE_KEY!
     )
 
-    // Find the OTP record (which contains MessageBird verifyId)
-    const { data: otpRecord, error: otpError } = await supabase
-      .from('otp_codes')
-      .select('*')
-      .eq('phone', phone)
-      .eq('type', 'seller')
-      .eq('verified', false)
-      .single()
-
-    if (otpError || !otpRecord) {
-      return NextResponse.json(
-        { success: false, error: 'otp_not_found', message: 'ไม่พบรหัส OTP กรุณาส่งใหม่' },
-        { status: 400 }
-      )
-    }
-
-    // Check if expired
-    if (new Date(otpRecord.expires_at) < new Date()) {
-      await supabase
-        .from('otp_codes')
-        .delete()
-        .eq('id', otpRecord.id)
-
-      return NextResponse.json(
-        { success: false, error: 'otp_expired', message: 'รหัส OTP หมดอายุ กรุณาส่งใหม่' },
-        { status: 400 }
-      )
-    }
-
-    // Verify OTP via MessageBird using stored verifyId
-    const verifyId = otpRecord.code // verifyId is stored in the code field
-    const verifyResult = await verifyOTP(verifyId, code)
+    // Verify OTP via Twilio (uses phone number directly)
+    const verifyResult = await verifyOTP(phone, code)
 
     if (!verifyResult.success) {
       return NextResponse.json(
@@ -70,11 +40,7 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Mark OTP as verified
-    await supabase
-      .from('otp_codes')
-      .update({ verified: true })
-      .eq('id', otpRecord.id)
+    // Twilio handles verification state, no need to track in DB
 
     // Check if seller already exists
     const { data: existingSeller } = await supabase
@@ -130,11 +96,7 @@ export async function POST(request: NextRequest) {
       path: '/'
     })
 
-    // Clean up used OTP
-    await supabase
-      .from('otp_codes')
-      .delete()
-      .eq('id', otpRecord.id)
+    // Twilio handles OTP verification state - no DB cleanup needed
 
     // Determine where to redirect
     let redirectTo = '/seller/dashboard'
