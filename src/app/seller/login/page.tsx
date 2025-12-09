@@ -3,27 +3,21 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { auth, RecaptchaVerifier, signInWithPhoneNumber, ConfirmationResult } from '@/lib/firebase'
-import { toInternationalPhone } from '@/lib/utils'
 import PhoneInput from '@/components/ui/PhoneInput'
 import OTPInput from '@/components/ui/OTPInput'
 
 type Step = 'phone' | 'otp'
 
-// Global variable to store recaptcha verifier
-let recaptchaVerifier: RecaptchaVerifier | null = null
-
 export default function SellerLoginPage() {
   const router = useRouter()
   const [step, setStep] = useState<Step>('phone')
   const [phone, setPhone] = useState('')
+  const [internationalPhone, setInternationalPhone] = useState('')
   const [otp, setOtp] = useState('')
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
   const [checkingSession, setCheckingSession] = useState(true)
   const [countdown, setCountdown] = useState(0)
-  const [confirmationResult, setConfirmationResult] = useState<ConfirmationResult | null>(null)
-  const [recaptchaReady, setRecaptchaReady] = useState(false)
 
   // Check if already logged in
   useEffect(() => {
@@ -51,88 +45,9 @@ export default function SellerLoginPage() {
     }
   }, [countdown])
 
-  // Cleanup recaptcha on unmount
-  useEffect(() => {
-    return () => {
-      if (recaptchaVerifier) {
-        recaptchaVerifier.clear()
-        recaptchaVerifier = null
-      }
-    }
-  }, [])
-
-  // Setup reCAPTCHA when on phone step
-  useEffect(() => {
-    if (typeof window === 'undefined') return
-    if (step !== 'phone') return
-    if (checkingSession) return
-
-    setRecaptchaReady(false)
-
-    if (recaptchaVerifier) {
-      try {
-        recaptchaVerifier.clear()
-      } catch {
-        // ignore
-      }
-      recaptchaVerifier = null
-    }
-
-    let attempts = 0
-    const maxAttempts = 5
-
-    const initRecaptcha = () => {
-      attempts++
-      const container = document.getElementById('recaptcha-container')
-
-      if (!container || !auth) {
-        if (attempts < maxAttempts) {
-          setTimeout(initRecaptcha, 500)
-        }
-        return
-      }
-
-      try {
-        recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
-          size: 'invisible',
-          callback: () => {},
-          'expired-callback': () => {
-            setRecaptchaReady(false)
-            setError('reCAPTCHA หมดอายุ กรุณารีเฟรชหน้า')
-          }
-        })
-
-        recaptchaVerifier.render()
-          .then(() => {
-            setRecaptchaReady(true)
-          })
-          .catch(() => {
-            if (attempts < maxAttempts) {
-              setTimeout(initRecaptcha, 500)
-            }
-          })
-      } catch {
-        if (attempts < maxAttempts) {
-          setTimeout(initRecaptcha, 500)
-        }
-      }
-    }
-
-    const timer = setTimeout(initRecaptcha, 300)
-
-    return () => {
-      clearTimeout(timer)
-    }
-  }, [step, checkingSession])
-
   const handleSendOTP = async () => {
     if (phone.length < 9) {
       setError('กรุณากรอกเบอร์โทรให้ถูกต้อง')
-      return
-    }
-
-    if (!recaptchaVerifier || !auth) {
-      setError('กรุณารอสักครู่แล้วลองใหม่')
       return
     }
 
@@ -140,25 +55,24 @@ export default function SellerLoginPage() {
     setLoading(true)
 
     try {
-      const internationalPhone = toInternationalPhone(phone)
-      const result = await signInWithPhoneNumber(auth, internationalPhone, recaptchaVerifier)
+      const res = await fetch('/api/auth/seller/send-otp', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ phone })
+      })
 
-      setConfirmationResult(result)
+      const data = await res.json()
+
+      if (!data.success) {
+        setError(data.message || 'เกิดข้อผิดพลาด')
+        return
+      }
+
+      setInternationalPhone(data.phone)
       setStep('otp')
       setCountdown(60)
-    } catch (err: unknown) {
-      const firebaseError = err as { code?: string; message?: string }
-      if (firebaseError.code === 'auth/invalid-phone-number') {
-        setError('เบอร์โทรไม่ถูกต้อง')
-      } else if (firebaseError.code === 'auth/too-many-requests') {
-        setError('ส่ง OTP มากเกินไป กรุณารอสักครู่')
-      } else if (firebaseError.code === 'auth/quota-exceeded') {
-        setError('เกินโควต้าการส่ง SMS กรุณาลองใหม่พรุ่งนี้')
-      } else if (firebaseError.code === 'auth/captcha-check-failed') {
-        setError('reCAPTCHA ล้มเหลว กรุณาลองใหม่')
-      } else {
-        setError('เกิดข้อผิดพลาด กรุณาลองใหม่')
-      }
+    } catch {
+      setError('เกิดข้อผิดพลาด กรุณาลองใหม่')
     } finally {
       setLoading(false)
     }
@@ -170,23 +84,14 @@ export default function SellerLoginPage() {
       return
     }
 
-    if (!confirmationResult) {
-      setError('กรุณาส่งรหัส OTP ใหม่')
-      return
-    }
-
     setError('')
     setLoading(true)
 
     try {
-      const result = await confirmationResult.confirm(otp)
-      const user = result.user
-      const idToken = await user.getIdToken()
-
-      const res = await fetch('/api/auth/seller/firebase-verify', {
+      const res = await fetch('/api/auth/seller/verify-otp', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ idToken })
+        body: JSON.stringify({ phone: internationalPhone, code: otp })
       })
 
       const data = await res.json()
@@ -196,22 +101,15 @@ export default function SellerLoginPage() {
         return
       }
 
-      // Check if this is a new account (phone not found)
+      // For login, check if this is a new account
       if (data.isNew) {
         setError('ไม่พบร้านค้าที่ใช้เบอร์นี้')
         return
       }
 
       router.push(data.redirectTo || '/seller/dashboard')
-    } catch (err: unknown) {
-      const firebaseError = err as { code?: string }
-      if (firebaseError.code === 'auth/invalid-verification-code') {
-        setError('รหัส OTP ไม่ถูกต้อง')
-      } else if (firebaseError.code === 'auth/code-expired') {
-        setError('รหัส OTP หมดอายุ กรุณาส่งใหม่')
-      } else {
-        setError('เกิดข้อผิดพลาด กรุณาลองใหม่')
-      }
+    } catch {
+      setError('เกิดข้อผิดพลาด กรุณาลองใหม่')
     } finally {
       setLoading(false)
     }
@@ -221,7 +119,28 @@ export default function SellerLoginPage() {
     if (countdown > 0) return
     setOtp('')
     setError('')
-    setStep('phone')
+    setLoading(true)
+
+    try {
+      const res = await fetch('/api/auth/seller/send-otp', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ phone })
+      })
+
+      const data = await res.json()
+
+      if (!data.success) {
+        setError(data.message || 'เกิดข้อผิดพลาด')
+        return
+      }
+
+      setCountdown(60)
+    } catch {
+      setError('เกิดข้อผิดพลาด กรุณาลองใหม่')
+    } finally {
+      setLoading(false)
+    }
   }
 
   const handleChangeNumber = () => {
@@ -229,7 +148,7 @@ export default function SellerLoginPage() {
     setPhone('')
     setOtp('')
     setError('')
-    setConfirmationResult(null)
+    setInternationalPhone('')
   }
 
   const formatPhoneDisplay = (p: string): string => {
@@ -240,7 +159,6 @@ export default function SellerLoginPage() {
     return p
   }
 
-  // Show loading while checking session
   if (checkingSession) {
     return (
       <div className="min-h-screen bg-white flex items-center justify-center">
@@ -255,7 +173,6 @@ export default function SellerLoginPage() {
   return (
     <div className="min-h-screen bg-white px-[5%] py-8">
       <div className="max-w-md mx-auto">
-        {/* Logo */}
         <Link href="/" className="inline-block text-2xl font-bold mb-8">
           TapShop
         </Link>
@@ -273,14 +190,12 @@ export default function SellerLoginPage() {
                 error={error}
               />
 
-              <div id="recaptcha-container"></div>
-
               <button
                 onClick={handleSendOTP}
-                disabled={loading || phone.length < 9 || !recaptchaReady}
+                disabled={loading || phone.length < 9}
                 className="w-full py-4 bg-black text-white font-semibold rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-neutral-800 transition-colors"
               >
-                {loading ? 'กำลังส่ง...' : !recaptchaReady ? 'กำลังโหลด...' : 'ส่งรหัส OTP'}
+                {loading ? 'กำลังส่ง...' : 'ส่งรหัส OTP'}
               </button>
 
               <p className="text-center text-secondary">
@@ -306,7 +221,6 @@ export default function SellerLoginPage() {
                 error={error}
               />
 
-              {/* Show signup link if phone not found */}
               {error === 'ไม่พบร้านค้าที่ใช้เบอร์นี้' && (
                 <div className="text-center">
                   <Link

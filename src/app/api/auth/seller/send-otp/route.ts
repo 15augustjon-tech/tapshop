@@ -1,26 +1,22 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
-import { generateOTP, sendOTP } from '@/lib/twilio'
+import { sendOTP } from '@/lib/messagebird'
 
-// Rate limiting: track OTP requests per phone
+// Rate limiting: track OTP requests per phone (in-memory for serverless)
 const otpRequests = new Map<string, { count: number; resetAt: number }>()
 
 // Convert Thai phone format to international
 function toInternationalPhone(phone: string): string {
-  // Remove all non-digits
   const digits = phone.replace(/\D/g, '')
 
-  // If starts with 0, replace with +66
   if (digits.startsWith('0')) {
     return '+66' + digits.slice(1)
   }
 
-  // If starts with 66, add +
   if (digits.startsWith('66')) {
     return '+' + digits
   }
 
-  // If already has +66
   if (phone.startsWith('+66')) {
     return phone.replace(/\D/g, '').replace(/^/, '+')
   }
@@ -32,12 +28,10 @@ function toInternationalPhone(phone: string): string {
 function isValidThaiPhone(phone: string): boolean {
   const digits = phone.replace(/\D/g, '')
 
-  // Thai mobile: 08X, 09X (10 digits total)
   if (digits.startsWith('0')) {
     return /^0[689]\d{8}$/.test(digits)
   }
 
-  // International format: 668X, 669X (11 digits)
   if (digits.startsWith('66')) {
     return /^66[689]\d{8}$/.test(digits)
   }
@@ -76,14 +70,23 @@ export async function POST(request: NextRequest) {
         }
         rateLimit.count++
       } else {
-        // Reset after 1 hour
         otpRequests.set(phoneKey, { count: 1, resetAt: now + hourMs })
       }
     } else {
       otpRequests.set(phoneKey, { count: 1, resetAt: now + hourMs })
     }
 
-    // Initialize Supabase with service role
+    // Send OTP via MessageBird
+    const result = await sendOTP(internationalPhone)
+
+    if (!result.success || !result.verifyId) {
+      return NextResponse.json(
+        { success: false, error: 'sms_failed', message: result.error || 'ส่ง SMS ไม่สำเร็จ กรุณาลองใหม่' },
+        { status: 500 }
+      )
+    }
+
+    // Store verifyId in database for verification step
     const supabase = createClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
       process.env.SUPABASE_SERVICE_ROLE_KEY!
@@ -96,35 +99,22 @@ export async function POST(request: NextRequest) {
       .eq('phone', internationalPhone)
       .eq('type', 'seller')
 
-    // Generate new OTP
-    const code = generateOTP()
+    // Store the MessageBird verify ID (not the actual OTP code)
     const expiresAt = new Date(Date.now() + 5 * 60 * 1000) // 5 minutes
-
-    // Store OTP in database
     const { error: insertError } = await supabase
       .from('otp_codes')
       .insert({
         phone: internationalPhone,
-        code,
+        code: result.verifyId, // Store verifyId instead of OTP code
         type: 'seller',
         expires_at: expiresAt.toISOString(),
         verified: false
       })
 
     if (insertError) {
-      console.error('Failed to store OTP:', insertError)
+      console.error('Failed to store verify ID:', insertError)
       return NextResponse.json(
         { success: false, error: 'server_error', message: 'เกิดข้อผิดพลาด กรุณาลองใหม่' },
-        { status: 500 }
-      )
-    }
-
-    // Send OTP via SMS
-    const smsSent = await sendOTP(internationalPhone, code)
-
-    if (!smsSent) {
-      return NextResponse.json(
-        { success: false, error: 'sms_failed', message: 'ส่ง SMS ไม่สำเร็จ กรุณาลองใหม่' },
         { status: 500 }
       )
     }
@@ -135,7 +125,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({
       success: true,
       message: `รหัส OTP ถูกส่งไปที่ ${maskedPhone}`,
-      phone: internationalPhone // For verify step
+      phone: internationalPhone
     })
 
   } catch (error) {

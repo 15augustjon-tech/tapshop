@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { cookies } from 'next/headers'
+import { verifyOTP } from '@/lib/messagebird'
 
 export async function POST(request: NextRequest) {
   try {
@@ -29,7 +30,7 @@ export async function POST(request: NextRequest) {
       process.env.SUPABASE_SERVICE_ROLE_KEY!
     )
 
-    // Find the OTP record
+    // Find the OTP record (which contains MessageBird verifyId)
     const { data: otpRecord, error: otpError } = await supabase
       .from('otp_codes')
       .select('*')
@@ -47,7 +48,6 @@ export async function POST(request: NextRequest) {
 
     // Check if expired
     if (new Date(otpRecord.expires_at) < new Date()) {
-      // Clean up expired OTP
       await supabase
         .from('otp_codes')
         .delete()
@@ -59,10 +59,13 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Check if code matches
-    if (otpRecord.code !== code) {
+    // Verify OTP via MessageBird using stored verifyId
+    const verifyId = otpRecord.code // verifyId is stored in the code field
+    const verifyResult = await verifyOTP(verifyId, code)
+
+    if (!verifyResult.success) {
       return NextResponse.json(
-        { success: false, error: 'invalid_otp', message: 'รหัส OTP ไม่ถูกต้อง' },
+        { success: false, error: 'invalid_otp', message: verifyResult.error || 'รหัส OTP ไม่ถูกต้อง' },
         { status: 400 }
       )
     }
@@ -84,7 +87,6 @@ export async function POST(request: NextRequest) {
     let isNew = false
 
     if (existingSeller) {
-      // Existing seller
       seller = existingSeller
     } else {
       // Create new seller with just phone
