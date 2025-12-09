@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@supabase/supabase-js'
 import { sendOTP } from '@/lib/messagebird'
 
 // Rate limiting: track OTP requests per phone (in-memory for serverless)
@@ -76,48 +75,17 @@ export async function POST(request: NextRequest) {
       otpRequests.set(phoneKey, { count: 1, resetAt: now + hourMs })
     }
 
-    // Send OTP via MessageBird
+    // Send OTP via Twilio Verify
     const result = await sendOTP(internationalPhone)
 
-    if (!result.success || !result.verifyId) {
+    if (!result.success) {
       return NextResponse.json(
         { success: false, error: 'sms_failed', message: result.error || 'ส่ง SMS ไม่สำเร็จ กรุณาลองใหม่' },
         { status: 500 }
       )
     }
 
-    // Store verifyId in database for verification step
-    const supabase = createClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.SUPABASE_SERVICE_ROLE_KEY!
-    )
-
-    // Clean up old OTPs for this phone
-    await supabase
-      .from('otp_codes')
-      .delete()
-      .eq('phone', internationalPhone)
-      .eq('type', 'seller')
-
-    // Store the MessageBird verify ID (not the actual OTP code)
-    const expiresAt = new Date(Date.now() + 5 * 60 * 1000) // 5 minutes
-    const { error: insertError } = await supabase
-      .from('otp_codes')
-      .insert({
-        phone: internationalPhone,
-        code: result.verifyId, // Store verifyId instead of OTP code
-        type: 'seller',
-        expires_at: expiresAt.toISOString(),
-        verified: false
-      })
-
-    if (insertError) {
-      console.error('Failed to store verify ID:', insertError)
-      return NextResponse.json(
-        { success: false, error: 'server_error', message: 'เกิดข้อผิดพลาด กรุณาลองใหม่' },
-        { status: 500 }
-      )
-    }
+    // Twilio handles OTP state - no database storage needed
 
     // Return success (mask phone number in response)
     const maskedPhone = phone.replace(/(\d{3})\d{4}(\d{3})/, '$1-XXX-$2')
