@@ -60,17 +60,8 @@ export default function AddressAutocomplete({
   const [loadError, setLoadError] = useState(false)
   const [gettingLocation, setGettingLocation] = useState(false)
   const [locationError, setLocationError] = useState('')
-
-  const handlePlaceChange = useCallback(() => {
-    const place = autocompleteRef.current?.getPlace()
-
-    if (place?.geometry?.location) {
-      const address = place.formatted_address || place.name || ''
-      const lat = place.geometry.location.lat()
-      const lng = place.geometry.location.lng()
-      onChange(address, lat, lng)
-    }
-  }, [onChange])
+  const [hasLocation, setHasLocation] = useState(false)
+  const [inputValue, setInputValue] = useState(value)
 
   // Get current location using GPS
   const handleGetCurrentLocation = useCallback(async () => {
@@ -97,6 +88,8 @@ export default function AddressAutocomplete({
             if (response.results[0]) {
               const address = response.results[0].formatted_address
               onChange(address, latitude, longitude)
+              setInputValue(address)
+              setHasLocation(true)
 
               // Update input field
               if (inputRef.current) {
@@ -104,7 +97,10 @@ export default function AddressAutocomplete({
               }
             } else {
               // No address found, just use coordinates
-              onChange(`${latitude}, ${longitude}`, latitude, longitude)
+              const coordStr = `${latitude.toFixed(6)}, ${longitude.toFixed(6)}`
+              onChange(coordStr, latitude, longitude)
+              setInputValue(coordStr)
+              setHasLocation(true)
             }
           }
         } catch (err) {
@@ -132,11 +128,35 @@ export default function AddressAutocomplete({
       },
       {
         enableHighAccuracy: true,
-        timeout: 10000,
-        maximumAge: 0
+        timeout: 15000,
+        maximumAge: 60000
       }
     )
   }, [onChange])
+
+  const handlePlaceChange = useCallback(() => {
+    const place = autocompleteRef.current?.getPlace()
+
+    if (place?.geometry?.location) {
+      const address = place.formatted_address || place.name || ''
+      const lat = place.geometry.location.lat()
+      const lng = place.geometry.location.lng()
+      onChange(address, lat, lng)
+      setInputValue(address)
+      setHasLocation(true)
+    }
+  }, [onChange])
+
+  // Handle manual text input (for cases when user just types)
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newValue = e.target.value
+    setInputValue(newValue)
+
+    // If user clears the field, reset
+    if (!newValue) {
+      setHasLocation(false)
+    }
+  }
 
   useEffect(() => {
     const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY
@@ -154,8 +174,7 @@ export default function AddressAutocomplete({
         if (inputRef.current && window.google) {
           autocompleteRef.current = new google.maps.places.Autocomplete(inputRef.current, {
             componentRestrictions: { country: 'th' },
-            fields: ['formatted_address', 'geometry', 'name'],
-            types: ['address']
+            fields: ['formatted_address', 'geometry', 'name']
           })
 
           autocompleteRef.current.addListener('place_changed', handlePlaceChange)
@@ -173,23 +192,31 @@ export default function AddressAutocomplete({
     }
   }, [handlePlaceChange])
 
+  // Set initial value
+  useEffect(() => {
+    if (value) {
+      setInputValue(value)
+      setHasLocation(true)
+    }
+  }, [value])
+
   return (
-    <div className="w-full">
-      {/* Current Location Button */}
+    <div className="w-full space-y-3">
+      {/* Current Location Button - Big and Prominent */}
       <button
         type="button"
         onClick={handleGetCurrentLocation}
         disabled={!isLoaded || gettingLocation}
-        className="w-full mb-3 py-3 px-4 border border-border rounded-lg font-medium flex items-center justify-center gap-2 hover:bg-neutral-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+        className="w-full py-4 px-4 bg-black text-white rounded-lg font-semibold flex items-center justify-center gap-3 hover:bg-neutral-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
       >
         {gettingLocation ? (
           <>
-            <div className="w-4 h-4 border-2 border-black border-t-transparent rounded-full animate-spin" />
+            <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
             <span>กำลังหาตำแหน่ง...</span>
           </>
         ) : (
           <>
-            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <circle cx="12" cy="12" r="3"/>
               <path d="M12 2v4"/>
               <path d="M12 18v4"/>
@@ -202,11 +229,21 @@ export default function AddressAutocomplete({
       </button>
 
       {locationError && (
-        <p className="mb-3 text-sm text-error">{locationError}</p>
+        <p className="text-sm text-error text-center">{locationError}</p>
+      )}
+
+      {/* Success indicator */}
+      {hasLocation && !gettingLocation && (
+        <div className="flex items-center gap-2 p-3 bg-green-50 text-green-700 rounded-lg">
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M20 6 9 17l-5-5"/>
+          </svg>
+          <span className="text-sm">ได้ตำแหน่งแล้ว</span>
+        </div>
       )}
 
       {/* Divider */}
-      <div className="flex items-center gap-3 mb-3">
+      <div className="flex items-center gap-3">
         <div className="flex-1 h-px bg-border" />
         <span className="text-sm text-secondary">หรือค้นหาที่อยู่</span>
         <div className="flex-1 h-px bg-border" />
@@ -216,19 +253,28 @@ export default function AddressAutocomplete({
       <input
         ref={inputRef}
         type="text"
-        defaultValue={value}
-        placeholder="พิมพ์ค้นหาที่อยู่..."
+        value={inputValue}
+        onChange={handleInputChange}
+        placeholder="พิมพ์ชื่อสถานที่ ถนน หรือซอย..."
         className={`w-full px-4 py-3 border ${error ? 'border-error' : 'border-border'} rounded-lg outline-none focus:ring-2 focus:ring-black focus:ring-offset-1`}
         disabled={!isLoaded && !loadError}
       />
+
+      {/* Display selected address */}
+      {hasLocation && inputValue && (
+        <p className="text-sm text-secondary px-1">
+          📍 {inputValue}
+        </p>
+      )}
+
       {error && (
-        <p className="mt-2 text-sm text-error">{error}</p>
+        <p className="text-sm text-error">{error}</p>
       )}
       {!isLoaded && !loadError && (
-        <p className="mt-2 text-sm text-secondary">กำลังโหลดแผนที่...</p>
+        <p className="text-sm text-secondary">กำลังโหลดแผนที่...</p>
       )}
       {loadError && (
-        <p className="mt-2 text-sm text-error">ไม่สามารถโหลดแผนที่ได้ กรุณารีเฟรชหน้า</p>
+        <p className="text-sm text-error">ไม่สามารถโหลดแผนที่ได้ กรุณารีเฟรชหน้า</p>
       )}
     </div>
   )
