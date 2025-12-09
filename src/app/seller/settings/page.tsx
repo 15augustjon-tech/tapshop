@@ -43,6 +43,11 @@ export default function SellerSettingsPage() {
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
 
+  // Delete account state
+  const [showDeleteModal, setShowDeleteModal] = useState(false)
+  const [confirmText, setConfirmText] = useState('')
+  const [deleting, setDeleting] = useState(false)
+
   // Form state
   const [shopName, setShopName] = useState('')
   const [promptpayId, setPromptpayId] = useState('')
@@ -198,6 +203,40 @@ export default function SellerSettingsPage() {
       console.error('Logout failed:', err)
       // Still redirect even if API fails
       router.push('/seller/login')
+    }
+  }
+
+  const handleDeleteAccount = async () => {
+    if (!seller) return
+
+    // Must type exact shop name to confirm
+    if (confirmText !== seller.shop_name) {
+      setError('กรุณาพิมพ์ชื่อร้านให้ถูกต้อง')
+      return
+    }
+
+    setDeleting(true)
+    setError('')
+
+    try {
+      const res = await fetch('/api/sellers/delete-account', {
+        method: 'DELETE'
+      })
+      const data = await res.json()
+
+      if (!data.success) {
+        setError(data.message || 'เกิดข้อผิดพลาด')
+        setDeleting(false)
+        return
+      }
+
+      // Success - redirect to homepage
+      alert('ลบบัญชีสำเร็จ')
+      router.push('/')
+    } catch (err) {
+      console.error('Delete error:', err)
+      setError('เกิดข้อผิดพลาด กรุณาลองใหม่')
+      setDeleting(false)
     }
   }
 
@@ -389,12 +428,92 @@ export default function SellerSettingsPage() {
           <button
             onClick={handleLogout}
             disabled={loggingOut}
-            className="w-full py-4 border border-red-500 text-red-500 font-semibold rounded-lg hover:bg-red-50 transition-colors disabled:opacity-50"
+            className="w-full py-4 border border-border text-secondary font-semibold rounded-lg hover:bg-neutral-50 transition-colors disabled:opacity-50"
           >
             {loggingOut ? 'กำลังออกจากระบบ...' : 'ออกจากระบบ'}
           </button>
+
+          {/* Danger Zone */}
+          <div className="border-t border-border pt-8 mt-8">
+            <h2 className="text-lg font-semibold text-red-600 mb-4">โซนอันตราย</h2>
+            <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-4">
+              <p className="text-sm text-red-800">
+                การลบบัญชีจะลบข้อมูลทั้งหมดอย่างถาวร รวมถึงสินค้า ออเดอร์ และข้อมูลลูกค้าทั้งหมด ไม่สามารถกู้คืนได้
+              </p>
+            </div>
+            <button
+              onClick={() => setShowDeleteModal(true)}
+              className="w-full py-4 px-4 bg-red-600 text-white rounded-lg font-medium hover:bg-red-700 transition-colors"
+            >
+              ลบบัญชีถาวร
+            </button>
+          </div>
         </div>
       </div>
+
+      {/* Delete Confirmation Modal */}
+      {showDeleteModal && (
+        <div
+          className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4"
+          onClick={() => !deleting && setShowDeleteModal(false)}
+        >
+          <div
+            className="bg-white rounded-2xl p-6 w-full max-w-sm"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h2 className="text-xl font-bold text-red-600 mb-4">ยืนยันลบบัญชี</h2>
+
+            <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
+              <p className="text-sm text-red-800 mb-2">
+                <strong>คำเตือน:</strong> การดำเนินการนี้ไม่สามารถยกเลิกได้
+              </p>
+              <ul className="text-sm text-red-700 list-disc list-inside space-y-1">
+                <li>สินค้าทั้งหมดจะถูกลบ</li>
+                <li>ออเดอร์ทั้งหมดจะถูกลบ</li>
+                <li>ข้อมูลลูกค้าทั้งหมดจะถูกลบ</li>
+                <li>ไม่สามารถกู้คืนได้</li>
+              </ul>
+            </div>
+
+            <p className="text-sm mb-2">
+              พิมพ์ <strong>{seller?.shop_name}</strong> เพื่อยืนยัน:
+            </p>
+            <input
+              type="text"
+              value={confirmText}
+              onChange={(e) => setConfirmText(e.target.value)}
+              placeholder={seller?.shop_name}
+              disabled={deleting}
+              className="w-full px-4 py-3 border border-border rounded-lg mb-4 disabled:bg-neutral-100"
+            />
+
+            {error && showDeleteModal && (
+              <p className="text-sm text-red-600 mb-4">{error}</p>
+            )}
+
+            <div className="flex gap-3">
+              <button
+                onClick={() => {
+                  setShowDeleteModal(false)
+                  setConfirmText('')
+                  setError('')
+                }}
+                disabled={deleting}
+                className="flex-1 py-3 border border-border rounded-lg font-medium hover:bg-neutral-50 transition-colors disabled:opacity-50"
+              >
+                ยกเลิก
+              </button>
+              <button
+                onClick={handleDeleteAccount}
+                disabled={deleting || confirmText !== seller?.shop_name}
+                className="flex-1 py-3 bg-red-600 text-white rounded-lg font-medium hover:bg-red-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {deleting ? 'กำลังลบ...' : 'ลบบัญชี'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
