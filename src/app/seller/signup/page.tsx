@@ -2,22 +2,28 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
+import { auth, RecaptchaVerifier, signInWithPhoneNumber, ConfirmationResult } from '@/lib/firebase'
+import { toInternationalPhone } from '@/lib/utils'
 import ProgressBar from '@/components/ui/ProgressBar'
 import PhoneInput from '@/components/ui/PhoneInput'
 import OTPInput from '@/components/ui/OTPInput'
 
 type Step = 'phone' | 'otp'
 
+// Global variable to store recaptcha verifier
+let recaptchaVerifier: RecaptchaVerifier | null = null
+
 export default function SellerSignupPage() {
   const router = useRouter()
   const [step, setStep] = useState<Step>('phone')
   const [phone, setPhone] = useState('')
-  const [internationalPhone, setInternationalPhone] = useState('')
   const [otp, setOtp] = useState('')
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
   const [checkingSession, setCheckingSession] = useState(true)
   const [countdown, setCountdown] = useState(0)
+  const [confirmationResult, setConfirmationResult] = useState<ConfirmationResult | null>(null)
+  const [recaptchaReady, setRecaptchaReady] = useState(false)
 
   // Check if already logged in
   useEffect(() => {
@@ -50,9 +56,97 @@ export default function SellerSignupPage() {
     }
   }, [countdown])
 
+  // Cleanup recaptcha on unmount
+  useEffect(() => {
+    return () => {
+      if (recaptchaVerifier) {
+        recaptchaVerifier.clear()
+        recaptchaVerifier = null
+      }
+    }
+  }, [])
+
+  // Setup reCAPTCHA when on phone step
+  useEffect(() => {
+    // Only run on client and when on phone step
+    if (typeof window === 'undefined') return
+    if (step !== 'phone') return
+    if (checkingSession) return
+
+    setRecaptchaReady(false)
+
+    // Clear any existing verifier
+    if (recaptchaVerifier) {
+      try {
+        recaptchaVerifier.clear()
+      } catch (e) {
+        // ignore
+      }
+      recaptchaVerifier = null
+    }
+
+    let attempts = 0
+    const maxAttempts = 5
+
+    const initRecaptcha = () => {
+      attempts++
+      const container = document.getElementById('recaptcha-container')
+
+      if (!container || !auth) {
+        // Retry if not ready yet (up to maxAttempts)
+        if (attempts < maxAttempts) {
+          setTimeout(initRecaptcha, 500)
+        }
+        return
+      }
+
+      try {
+        recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
+          size: 'invisible',
+          callback: () => {
+            // reCAPTCHA verified
+          },
+          'expired-callback': () => {
+            setRecaptchaReady(false)
+            setError('reCAPTCHA หมดอายุ กรุณารีเฟรชหน้า')
+          }
+        })
+
+        // Pre-render the reCAPTCHA
+        recaptchaVerifier.render()
+          .then(() => {
+            setRecaptchaReady(true)
+          })
+          .catch(() => {
+            // Retry on render error
+            if (attempts < maxAttempts) {
+              setTimeout(initRecaptcha, 500)
+            }
+          })
+      } catch {
+        // Retry on creation error
+        if (attempts < maxAttempts) {
+          setTimeout(initRecaptcha, 500)
+        }
+      }
+    }
+
+    // Start initialization after a short delay
+    const timer = setTimeout(initRecaptcha, 300)
+
+    return () => {
+      clearTimeout(timer)
+    }
+  }, [step, checkingSession]) // Re-run when step or checkingSession changes
+
   const handleSendOTP = async () => {
     if (phone.length < 9) {
       setError('กรุณากรอกเบอร์โทรให้ถูกต้อง')
+      return
+    }
+
+    if (!recaptchaVerifier || !auth) {
+      setError('กรุณารอสักครู่แล้วลองใหม่')
       return
     }
 
@@ -60,25 +154,31 @@ export default function SellerSignupPage() {
     setLoading(true)
 
     try {
-      const res = await fetch('/api/auth/seller/send-otp', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ phone })
-      })
+      const internationalPhone = toInternationalPhone(phone)
 
-      const data = await res.json()
+      const result = await signInWithPhoneNumber(auth, internationalPhone, recaptchaVerifier)
 
-      if (!data.success) {
-        setError(data.message || 'เกิดข้อผิดพลาด')
-        return
-      }
-
-      // Store international phone for verify step
-      setInternationalPhone(data.phone)
+      setConfirmationResult(result)
       setStep('otp')
       setCountdown(60)
-    } catch {
-      setError('เกิดข้อผิดพลาด กรุณาลองใหม่')
+      localStorage.setItem('signup_phone', internationalPhone)
+    } catch (err: any) {
+      // Handle specific Firebase errors
+      if (err.code === 'auth/invalid-phone-number') {
+        setError('เบอร์โทรไม่ถูกต้อง')
+      } else if (err.code === 'auth/too-many-requests') {
+        setError('ส่ง OTP มากเกินไป กรุณารอสักครู่')
+      } else if (err.code === 'auth/quota-exceeded') {
+        setError('เกินโควต้าการส่ง SMS กรุณาลองใหม่พรุ่งนี้')
+      } else if (err.code === 'auth/invalid-app-credential') {
+        setError('การตั้งค่า Firebase ไม่ถูกต้อง - ตรวจสอบ Console')
+      } else if (err.code === 'auth/captcha-check-failed') {
+        setError('reCAPTCHA ล้มเหลว กรุณาลองใหม่')
+      } else {
+        setError(`Error: ${err.code || err.message || 'Unknown error'}`)
+      }
+
+      // Don't clear recaptcha on error - let user retry
     } finally {
       setLoading(false)
     }
@@ -90,14 +190,26 @@ export default function SellerSignupPage() {
       return
     }
 
+    if (!confirmationResult) {
+      setError('กรุณาส่งรหัส OTP ใหม่')
+      return
+    }
+
     setError('')
     setLoading(true)
 
     try {
-      const res = await fetch('/api/auth/seller/verify-otp', {
+      const result = await confirmationResult.confirm(otp)
+      const user = result.user
+
+      // Get the ID token for server-side verification
+      const idToken = await user.getIdToken()
+
+      // Create/get seller in our database (send ID token, not raw data)
+      const res = await fetch('/api/auth/seller/firebase-verify', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ phone: internationalPhone, code: otp })
+        body: JSON.stringify({ idToken, isSignup: true })
       })
 
       const data = await res.json()
@@ -107,9 +219,16 @@ export default function SellerSignupPage() {
         return
       }
 
+      localStorage.removeItem('signup_phone')
       router.push(data.redirectTo)
-    } catch {
-      setError('เกิดข้อผิดพลาด กรุณาลองใหม่')
+    } catch (err: any) {
+      if (err.code === 'auth/invalid-verification-code') {
+        setError('รหัส OTP ไม่ถูกต้อง')
+      } else if (err.code === 'auth/code-expired') {
+        setError('รหัส OTP หมดอายุ กรุณาส่งใหม่')
+      } else {
+        setError('เกิดข้อผิดพลาด กรุณาลองใหม่')
+      }
     } finally {
       setLoading(false)
     }
@@ -119,36 +238,16 @@ export default function SellerSignupPage() {
     if (countdown > 0) return
     setOtp('')
     setError('')
-    setLoading(true)
-
-    try {
-      const res = await fetch('/api/auth/seller/send-otp', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ phone })
-      })
-
-      const data = await res.json()
-
-      if (!data.success) {
-        setError(data.message || 'เกิดข้อผิดพลาด')
-        return
-      }
-
-      setCountdown(60)
-    } catch {
-      setError('เกิดข้อผิดพลาด กรุณาลองใหม่')
-    } finally {
-      setLoading(false)
-    }
+    setStep('phone') // Go back to phone step to show reCAPTCHA again
   }
 
   const handleChangeNumber = () => {
+    localStorage.removeItem('signup_phone')
     setStep('phone')
     setPhone('')
     setOtp('')
     setError('')
-    setInternationalPhone('')
+    setConfirmationResult(null)
   }
 
   const formatPhoneDisplay = (p: string): string => {
@@ -189,12 +288,15 @@ export default function SellerSignupPage() {
                 error={error}
               />
 
+              {/* Invisible reCAPTCHA container */}
+              <div id="recaptcha-container"></div>
+
               <button
                 onClick={handleSendOTP}
-                disabled={loading || phone.length < 9}
+                disabled={loading || phone.length < 9 || !recaptchaReady}
                 className="w-full py-4 bg-black text-white font-semibold rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-neutral-800 transition-colors"
               >
-                {loading ? 'กำลังส่ง...' : 'ส่งรหัส OTP'}
+                {loading ? 'กำลังส่ง...' : !recaptchaReady ? 'กำลังโหลด...' : 'ส่งรหัส OTP'}
               </button>
 
               <p className="text-center text-secondary">
