@@ -1,10 +1,12 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
+import Link from 'next/link'
 import ProgressBar from '@/components/ui/ProgressBar'
 import PhoneInput from '@/components/ui/PhoneInput'
 import OTPInput from '@/components/ui/OTPInput'
+import { auth, RecaptchaVerifier, signInWithPhoneNumber, ConfirmationResult } from '@/lib/firebase'
 
 type Step = 'phone' | 'otp'
 
@@ -19,7 +21,10 @@ export default function SellerSignupPage() {
   const [checkingSession, setCheckingSession] = useState(true)
   const [countdown, setCountdown] = useState(0)
 
-  // Check if already logged in
+  const recaptchaVerifierRef = useRef<RecaptchaVerifier | null>(null)
+  const confirmationResultRef = useRef<ConfirmationResult | null>(null)
+  const recaptchaContainerRef = useRef<HTMLDivElement>(null)
+
   useEffect(() => {
     const checkSession = async () => {
       try {
@@ -41,13 +46,39 @@ export default function SellerSignupPage() {
     checkSession()
   }, [router])
 
-  // Countdown timer for resend
   useEffect(() => {
     if (countdown > 0) {
       const timer = setTimeout(() => setCountdown(countdown - 1), 1000)
       return () => clearTimeout(timer)
     }
   }, [countdown])
+
+  const initRecaptcha = () => {
+    if (!recaptchaContainerRef.current) return
+
+    if (recaptchaVerifierRef.current) {
+      recaptchaVerifierRef.current.clear()
+    }
+
+    recaptchaVerifierRef.current = new RecaptchaVerifier(auth, recaptchaContainerRef.current, {
+      size: 'invisible',
+      callback: () => {},
+      'expired-callback': () => {
+        setError('reCAPTCHA หมดอายุ กรุณาลองใหม่')
+      }
+    })
+  }
+
+  const toInternationalPhone = (p: string): string => {
+    const digits = p.replace(/\D/g, '')
+    if (digits.startsWith('0')) {
+      return '+66' + digits.slice(1)
+    }
+    if (digits.startsWith('66')) {
+      return '+' + digits
+    }
+    return '+66' + digits
+  }
 
   const handleSendOTP = async () => {
     if (phone.length < 9) {
@@ -59,24 +90,40 @@ export default function SellerSignupPage() {
     setLoading(true)
 
     try {
-      const res = await fetch('/api/auth/seller/send-otp', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ phone })
-      })
-
-      const data = await res.json()
-
-      if (!data.success) {
-        setError(data.message || 'เกิดข้อผิดพลาด')
-        return
+      if (!recaptchaVerifierRef.current) {
+        initRecaptcha()
       }
 
-      setInternationalPhone(data.phone)
+      const intlPhone = toInternationalPhone(phone)
+      setInternationalPhone(intlPhone)
+
+      const confirmationResult = await signInWithPhoneNumber(
+        auth,
+        intlPhone,
+        recaptchaVerifierRef.current!
+      )
+
+      confirmationResultRef.current = confirmationResult
       setStep('otp')
       setCountdown(60)
-    } catch {
-      setError('เกิดข้อผิดพลาด กรุณาลองใหม่')
+    } catch (err: unknown) {
+      console.error('Firebase send OTP error:', err)
+      const firebaseError = err as { code?: string; message?: string }
+
+      if (firebaseError.code === 'auth/invalid-phone-number') {
+        setError('เบอร์โทรไม่ถูกต้อง')
+      } else if (firebaseError.code === 'auth/too-many-requests') {
+        setError('ส่ง OTP มากเกินไป กรุณารอสักครู่')
+      } else if (firebaseError.code === 'auth/quota-exceeded') {
+        setError('ระบบ SMS เกินโควต้า กรุณาลองใหม่ภายหลัง')
+      } else {
+        setError('เกิดข้อผิดพลาด กรุณาลองใหม่')
+      }
+
+      if (recaptchaVerifierRef.current) {
+        recaptchaVerifierRef.current.clear()
+        recaptchaVerifierRef.current = null
+      }
     } finally {
       setLoading(false)
     }
@@ -88,14 +135,25 @@ export default function SellerSignupPage() {
       return
     }
 
+    if (!confirmationResultRef.current) {
+      setError('กรุณาขอรหัส OTP ใหม่')
+      return
+    }
+
     setError('')
     setLoading(true)
 
     try {
-      const res = await fetch('/api/auth/seller/verify-otp', {
+      const result = await confirmationResultRef.current.confirm(otp)
+      const idToken = await result.user.getIdToken()
+
+      const res = await fetch('/api/auth/seller/verify-firebase', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ phone: internationalPhone, code: otp })
+        body: JSON.stringify({
+          idToken,
+          phone: internationalPhone
+        })
       })
 
       const data = await res.json()
@@ -106,8 +164,17 @@ export default function SellerSignupPage() {
       }
 
       router.push(data.redirectTo || '/seller/signup/info')
-    } catch {
-      setError('เกิดข้อผิดพลาด กรุณาลองใหม่')
+    } catch (err: unknown) {
+      console.error('Firebase verify OTP error:', err)
+      const firebaseError = err as { code?: string }
+
+      if (firebaseError.code === 'auth/invalid-verification-code') {
+        setError('รหัส OTP ไม่ถูกต้อง')
+      } else if (firebaseError.code === 'auth/code-expired') {
+        setError('รหัส OTP หมดอายุ กรุณาขอใหม่')
+      } else {
+        setError('เกิดข้อผิดพลาด กรุณาลองใหม่')
+      }
     } finally {
       setLoading(false)
     }
@@ -117,28 +184,13 @@ export default function SellerSignupPage() {
     if (countdown > 0) return
     setOtp('')
     setError('')
-    setLoading(true)
 
-    try {
-      const res = await fetch('/api/auth/seller/send-otp', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ phone })
-      })
-
-      const data = await res.json()
-
-      if (!data.success) {
-        setError(data.message || 'เกิดข้อผิดพลาด')
-        return
-      }
-
-      setCountdown(60)
-    } catch {
-      setError('เกิดข้อผิดพลาด กรุณาลองใหม่')
-    } finally {
-      setLoading(false)
+    if (recaptchaVerifierRef.current) {
+      recaptchaVerifierRef.current.clear()
+      recaptchaVerifierRef.current = null
     }
+
+    await handleSendOTP()
   }
 
   const handleChangeNumber = () => {
@@ -147,6 +199,12 @@ export default function SellerSignupPage() {
     setOtp('')
     setError('')
     setInternationalPhone('')
+    confirmationResultRef.current = null
+
+    if (recaptchaVerifierRef.current) {
+      recaptchaVerifierRef.current.clear()
+      recaptchaVerifierRef.current = null
+    }
   }
 
   const formatPhoneDisplay = (p: string): string => {
@@ -159,96 +217,116 @@ export default function SellerSignupPage() {
 
   if (checkingSession) {
     return (
-      <div className="min-h-screen bg-white flex items-center justify-center">
-        <div className="text-center">
-          <div className="w-8 h-8 border-2 border-black border-t-transparent rounded-full animate-spin mx-auto mb-4" />
-          <p className="text-secondary">กำลังโหลด...</p>
+      <div className="min-h-screen bg-gradient-main flex items-center justify-center">
+        <div className="icon-box w-16 h-16 !rounded-[20px] animate-pulse">
+          <div className="w-6 h-6 border-2 border-[#1a1a1a] border-t-transparent rounded-full animate-spin" />
         </div>
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen bg-white px-[5%] py-8">
-      <div className="max-w-md mx-auto">
-        <ProgressBar currentStep={1} totalSteps={3} />
+    <div className="min-h-screen bg-gradient-main overflow-x-hidden">
+      {/* Ambient Lights */}
+      <div className="ambient-1" />
+      <div className="ambient-2" />
 
-        {step === 'phone' ? (
-          <>
-            <h1 className="text-3xl font-bold mb-2">สร้างร้านค้า</h1>
-            <p className="text-secondary mb-8">กรอกเบอร์โทรศัพท์เพื่อเริ่มต้น</p>
+      <div className="px-4 py-8 relative z-10">
+        <div className="max-w-md mx-auto">
+          <ProgressBar currentStep={1} totalSteps={3} />
 
-            <div className="space-y-6">
-              <PhoneInput
-                value={phone}
-                onChange={setPhone}
-                disabled={loading}
-                error={error}
-              />
+          {/* reCAPTCHA container (invisible) */}
+          <div ref={recaptchaContainerRef} id="recaptcha-container" />
 
-              <button
-                onClick={handleSendOTP}
-                disabled={loading || phone.length < 9}
-                className="w-full py-4 bg-black text-white font-semibold rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-neutral-800 transition-colors"
-              >
-                {loading ? 'กำลังส่ง...' : 'ส่งรหัส OTP'}
-              </button>
+          {step === 'phone' ? (
+            <div className="glass-card !rounded-[24px] p-6">
+              <h1 className="text-2xl font-bold text-[#1a1a1a] mb-2">สร้างร้านค้า</h1>
+              <p className="text-[#7a6f63] mb-6">กรอกเบอร์โทรศัพท์เพื่อเริ่มต้น</p>
 
-              <p className="text-center text-secondary">
-                มีบัญชีแล้ว?{' '}
-                <a href="/seller/login" className="text-black font-semibold hover:underline">
-                  เข้าสู่ระบบ
-                </a>
-              </p>
-            </div>
-          </>
-        ) : (
-          <>
-            <h1 className="text-3xl font-bold mb-2">ยืนยันเบอร์โทร</h1>
-            <p className="text-secondary mb-8">
-              รหัส OTP ถูกส่งไปที่ {formatPhoneDisplay(phone)}
-            </p>
-
-            <div className="space-y-6">
-              <OTPInput
-                value={otp}
-                onChange={setOtp}
-                disabled={loading}
-                error={error}
-              />
-
-              <button
-                onClick={handleVerifyOTP}
-                disabled={loading || otp.length !== 6}
-                className="w-full py-4 bg-black text-white font-semibold rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-neutral-800 transition-colors"
-              >
-                {loading ? 'กำลังยืนยัน...' : 'ยืนยัน'}
-              </button>
-
-              <div className="flex justify-between">
-                <button
-                  onClick={handleResend}
-                  disabled={countdown > 0 || loading}
-                  className={`px-4 py-3 min-h-[44px] text-sm rounded-lg transition-colors ${
-                    countdown > 0
-                      ? 'text-secondary bg-neutral-100'
-                      : 'text-black border border-border hover:bg-neutral-100'
-                  } disabled:cursor-not-allowed`}
-                >
-                  {countdown > 0 ? `ส่งรหัสใหม่ (${countdown}s)` : 'ส่งรหัสใหม่'}
-                </button>
-
-                <button
-                  onClick={handleChangeNumber}
+              <div className="space-y-5">
+                <PhoneInput
+                  value={phone}
+                  onChange={setPhone}
                   disabled={loading}
-                  className="px-4 py-3 min-h-[44px] text-sm text-black border border-border rounded-lg hover:bg-neutral-100 transition-colors disabled:opacity-50"
+                  error={error}
+                />
+
+                <button
+                  onClick={handleSendOTP}
+                  disabled={loading || phone.length < 9}
+                  className="btn-primary w-full !py-4"
                 >
-                  เปลี่ยนเบอร์
+                  {loading ? (
+                    <span className="flex items-center justify-center gap-2">
+                      <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                      กำลังส่ง...
+                    </span>
+                  ) : (
+                    'ส่งรหัส OTP'
+                  )}
                 </button>
+
+                <p className="text-center text-[#7a6f63]">
+                  มีบัญชีแล้ว?{' '}
+                  <Link href="/seller/login" className="text-[#1a1a1a] font-semibold hover:underline">
+                    เข้าสู่ระบบ
+                  </Link>
+                </p>
               </div>
             </div>
-          </>
-        )}
+          ) : (
+            <div className="glass-card !rounded-[24px] p-6">
+              <h1 className="text-2xl font-bold text-[#1a1a1a] mb-2">ยืนยันเบอร์โทร</h1>
+              <p className="text-[#7a6f63] mb-6">
+                รหัส OTP ถูกส่งไปที่ {formatPhoneDisplay(phone)}
+              </p>
+
+              <div className="space-y-5">
+                <OTPInput
+                  value={otp}
+                  onChange={setOtp}
+                  disabled={loading}
+                  error={error}
+                />
+
+                <button
+                  onClick={handleVerifyOTP}
+                  disabled={loading || otp.length !== 6}
+                  className="btn-primary w-full !py-4"
+                >
+                  {loading ? (
+                    <span className="flex items-center justify-center gap-2">
+                      <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                      กำลังยืนยัน...
+                    </span>
+                  ) : (
+                    'ยืนยัน'
+                  )}
+                </button>
+
+                <div className="flex gap-3">
+                  <button
+                    onClick={handleResend}
+                    disabled={countdown > 0 || loading}
+                    className={`flex-1 btn-secondary !py-3 ${
+                      countdown > 0 ? 'opacity-50' : ''
+                    }`}
+                  >
+                    {countdown > 0 ? `ส่งรหัสใหม่ (${countdown}s)` : 'ส่งรหัสใหม่'}
+                  </button>
+
+                  <button
+                    onClick={handleChangeNumber}
+                    disabled={loading}
+                    className="flex-1 btn-secondary !py-3"
+                  >
+                    เปลี่ยนเบอร์
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   )

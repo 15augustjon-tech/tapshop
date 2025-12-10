@@ -38,23 +38,26 @@ export function useCheckout(shopSlug: string) {
 
   // Load from sessionStorage on mount
   useEffect(() => {
-    const stored = sessionStorage.getItem(CHECKOUT_KEY)
-    if (stored) {
-      try {
-        const parsed = JSON.parse(stored)
-        // Only use if same shop
-        if (parsed.shopSlug === shopSlug) {
-          setData({
-            address: parsed.address || null,
-            quote: parsed.quote || null,
-            saveAddress: parsed.saveAddress || false
-          })
+    const loadCheckout = () => {
+      const stored = sessionStorage.getItem(CHECKOUT_KEY)
+      if (stored) {
+        try {
+          const parsed = JSON.parse(stored)
+          // Only use if same shop
+          if (parsed.shopSlug === shopSlug) {
+            setData({
+              address: parsed.address || null,
+              quote: parsed.quote || null,
+              saveAddress: parsed.saveAddress || false
+            })
+          }
+        } catch {
+          // Invalid JSON - ignore
         }
-      } catch {
-        // Invalid JSON - ignore
       }
+      setIsLoaded(true)
     }
-    setIsLoaded(true)
+    loadCheckout()
   }, [shopSlug])
 
   // Save to sessionStorage when data changes

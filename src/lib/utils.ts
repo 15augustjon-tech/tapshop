@@ -48,7 +48,7 @@ export function isWithinOperatingHours(): boolean {
 }
 
 // Get next available delivery slots
-export function getDeliverySlots(shippingDays: number[], shippingTime: string): Date[] {
+export function getDeliverySlots(shippingDays: number[], _shippingTime: string): Date[] {
   const slots: Date[] = []
   const now = new Date()
   const bangkokNow = new Date(now.toLocaleString('en-US', { timeZone: 'Asia/Bangkok' }))

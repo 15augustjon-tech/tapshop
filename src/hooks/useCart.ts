@@ -24,29 +24,32 @@ export function useCart(shopSlug: string) {
 
   // Load cart from localStorage on mount
   useEffect(() => {
-    const stored = localStorage.getItem(CART_KEY)
-    if (stored) {
-      try {
-        const parsed: Cart = JSON.parse(stored)
-        // Clear cart if it's for a different shop
-        if (parsed.shopSlug === shopSlug) {
-          setCart(parsed)
-        } else {
-          // Different shop - clear cart
+    const loadCart = () => {
+      const stored = localStorage.getItem(CART_KEY)
+      if (stored) {
+        try {
+          const parsed: Cart = JSON.parse(stored)
+          // Clear cart if it's for a different shop
+          if (parsed.shopSlug === shopSlug) {
+            setCart(parsed)
+          } else {
+            // Different shop - clear cart
+            const newCart = { shopSlug, items: [] }
+            setCart(newCart)
+            localStorage.setItem(CART_KEY, JSON.stringify(newCart))
+          }
+        } catch {
+          // Invalid JSON - reset cart
           const newCart = { shopSlug, items: [] }
           setCart(newCart)
           localStorage.setItem(CART_KEY, JSON.stringify(newCart))
         }
-      } catch {
-        // Invalid JSON - reset cart
-        const newCart = { shopSlug, items: [] }
-        setCart(newCart)
-        localStorage.setItem(CART_KEY, JSON.stringify(newCart))
+      } else {
+        setCart({ shopSlug, items: [] })
       }
-    } else {
-      setCart({ shopSlug, items: [] })
+      setIsLoaded(true)
     }
-    setIsLoaded(true)
+    loadCart()
   }, [shopSlug])
 
   // Save cart to localStorage whenever it changes

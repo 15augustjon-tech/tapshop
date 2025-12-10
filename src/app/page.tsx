@@ -1,244 +1,177 @@
 'use client'
 
-import { useState } from 'react'
 import Link from 'next/link'
-import { useI18n, LanguageToggle } from '@/lib/i18n'
 
 export default function LandingPage() {
-  const [openFaq, setOpenFaq] = useState<number | null>(null)
-  const { t } = useI18n()
-
-  const faqs = [
-    { q: t('faq.q1'), a: t('faq.a1') },
-    { q: t('faq.q2'), a: t('faq.a2') },
-    { q: t('faq.q3'), a: t('faq.a3') },
-    { q: t('faq.q4'), a: t('faq.a4') },
-    { q: t('faq.q5'), a: t('faq.a5') }
-  ]
-
   return (
-    <div className="min-h-screen bg-white">
-      {/* Navbar */}
-      <nav className="sticky top-0 z-50 bg-white border-b border-gray-100">
-        <div className="max-w-6xl mx-auto px-4 py-4 flex justify-between items-center">
-          <Link href="/" className="text-2xl font-bold">TapShop</Link>
-          <div className="flex items-center gap-4">
-            <LanguageToggle />
+    <div className="min-h-dvh relative overflow-hidden">
+      {/* Ambient Light Decorations */}
+      <div className="ambient-light ambient-1" />
+      <div className="ambient-light ambient-2" />
+      <div className="ambient-light ambient-3" />
+
+      {/* Glass Orbs */}
+      <div className="glass-orb w-[120px] h-[120px] top-[8%] right-[5%] animate-orb" style={{ animationDelay: '0s' }} />
+      <div className="glass-orb w-[80px] h-[80px] bottom-[25%] left-[5%] animate-orb" style={{ animationDelay: '2s' }} />
+      <div className="glass-orb w-[60px] h-[60px] top-[45%] right-[8%] animate-orb" style={{ animationDelay: '4s' }} />
+
+      {/* Floating Sparkles */}
+      <div className="floating-element float-sparkle top-[18%] left-[12%] animate-twinkle" style={{ animationDelay: '0s' }} />
+      <div className="floating-element float-sparkle top-[35%] right-[15%] animate-twinkle" style={{ animationDelay: '1s' }} />
+      <div className="floating-element float-sparkle bottom-[30%] left-[18%] animate-twinkle" style={{ animationDelay: '0.5s' }} />
+      <div className="floating-element float-sparkle top-[60%] right-[12%] animate-twinkle" style={{ animationDelay: '1.5s' }} />
+
+      {/* Navigation */}
+      <nav className="fixed top-0 left-0 right-0 z-50 px-4 pt-5">
+        <div className="max-w-[480px] mx-auto">
+          <div className="glass-card !rounded-full px-5 py-3 flex items-center justify-between">
+            <span className="text-lg font-extrabold text-[#1a1a1a] tracking-tight">
+              Tap<span className="text-[#22c55e]">Shop</span>
+            </span>
             <Link
               href="/seller/signup"
-              className="bg-black text-white px-4 py-2 text-sm font-medium hover:bg-gray-800 transition-colors"
+              className="px-5 py-2.5 bg-gradient-to-br from-[#1a1a1a] to-[#2d2d2d] text-white text-sm font-bold rounded-full shadow-lg hover:scale-105 transition-transform"
             >
-              {t('nav.createShop')}
+              สร้างร้านฟรี
             </Link>
           </div>
         </div>
       </nav>
 
-      {/* Hero */}
-      <section className="px-4 py-20 md:py-32">
-        <div className="max-w-4xl mx-auto text-center">
-          <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold mb-6">
-            {t('hero.title1')}
-            {t('hero.title2') && <><br />{t('hero.title2')}</>}
-          </h1>
-          <p className="text-lg md:text-xl text-gray-600 mb-10 max-w-2xl mx-auto">
-            {t('hero.subtitle')}
-          </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link
-              href="/seller/signup"
-              className="bg-black text-white px-8 py-4 text-lg font-medium hover:bg-gray-800 transition-colors"
-            >
-              {t('hero.cta')}
-            </Link>
-          </div>
-        </div>
-      </section>
+      {/* Main Content */}
+      <div className="relative z-10 max-w-[480px] mx-auto px-5 pt-28 pb-12">
+        {/* Hero Headline */}
+        <h1 className="text-center text-[clamp(36px,8vw,48px)] font-extrabold text-[#1a1a1a] leading-[1.1] tracking-tight mb-5 animate-fade-up" style={{ animationDelay: '0.2s' }}>
+          ขายออนไลน์<br />
+          <span className="relative inline-block">
+            ง่ายกว่าที่คิด
+            <span className="absolute bottom-1 left-0 right-0 h-3 bg-gradient-to-r from-[rgba(34,197,94,0.25)] to-[rgba(134,239,172,0.25)] rounded -z-10" />
+          </span>
+        </h1>
 
-      {/* Value Props */}
-      <section className="px-4 py-16 bg-gray-50">
-        <div className="max-w-5xl mx-auto grid md:grid-cols-3 gap-8 text-center">
-          <div className="p-6">
-            <div className="w-16 h-16 mx-auto mb-4 bg-black text-white rounded-full flex items-center justify-center">
-              <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
-            </div>
-            <h3 className="text-xl font-bold mb-2">{t('value.setup.title')}</h3>
-            <p className="text-gray-600">{t('value.setup.desc')}</p>
-          </div>
-          <div className="p-6">
-            <div className="w-16 h-16 mx-auto mb-4 bg-black text-white rounded-full flex items-center justify-center">
-              <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
-              </svg>
-            </div>
-            <h3 className="text-xl font-bold mb-2">{t('value.order.title')}</h3>
-            <p className="text-gray-600">{t('value.order.desc')}</p>
-          </div>
-          <div className="p-6">
-            <div className="w-16 h-16 mx-auto mb-4 bg-black text-white rounded-full flex items-center justify-center">
-              <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-              </svg>
-            </div>
-            <h3 className="text-xl font-bold mb-2">{t('value.delivery.title')}</h3>
-            <p className="text-gray-600">{t('value.delivery.desc')}</p>
-          </div>
-        </div>
-      </section>
+        {/* Hero Subtitle */}
+        <p className="text-center text-[16px] text-[#7a6f63] leading-[1.7] mb-8 animate-fade-up" style={{ animationDelay: '0.3s' }}>
+          สร้างร้าน ใส่สินค้า แชร์ลิงก์ แค่นั้น<br />
+          เราจัดการส่งของและเก็บเงินให้ทั้งหมด
+        </p>
 
-      {/* How It Works */}
-      <section className="px-4 py-20">
-        <div className="max-w-5xl mx-auto">
-          <h2 className="text-3xl md:text-4xl font-bold text-center mb-16">{t('how.title')}</h2>
-          <div className="grid md:grid-cols-3 gap-12">
-            <div className="text-center">
-              <div className="w-12 h-12 mx-auto mb-4 bg-gray-100 rounded-full flex items-center justify-center text-2xl font-bold">1</div>
-              <h3 className="text-xl font-bold mb-2">{t('how.step1.title')}</h3>
-              <p className="text-gray-600">{t('how.step1.desc')}</p>
-            </div>
-            <div className="text-center">
-              <div className="w-12 h-12 mx-auto mb-4 bg-gray-100 rounded-full flex items-center justify-center text-2xl font-bold">2</div>
-              <h3 className="text-xl font-bold mb-2">{t('how.step2.title')}</h3>
-              <p className="text-gray-600">{t('how.step2.desc')}</p>
-            </div>
-            <div className="text-center">
-              <div className="w-12 h-12 mx-auto mb-4 bg-gray-100 rounded-full flex items-center justify-center text-2xl font-bold">3</div>
-              <h3 className="text-xl font-bold mb-2">{t('how.step3.title')}</h3>
-              <p className="text-gray-600">{t('how.step3.desc')}</p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Features */}
-      <section className="px-4 py-20 bg-black text-white">
-        <div className="max-w-5xl mx-auto">
-          <h2 className="text-3xl md:text-4xl font-bold text-center mb-16">{t('features.title')}</h2>
-          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-8">
-            {[
-              { icon: '💬', title: t('features.noDM'), desc: t('features.noDMDesc') },
-              { icon: '📝', title: t('features.noAddress'), desc: t('features.noAddressDesc') },
-              { icon: '🛵', title: t('features.noGrab'), desc: t('features.noGrabDesc') },
-              { icon: '💵', title: t('features.cod'), desc: t('features.codDesc') }
-            ].map((feature, i) => (
-              <div key={i} className="text-center p-6">
-                <div className="text-4xl mb-4">{feature.icon}</div>
-                <p className="text-lg font-medium mb-2">{feature.title}</p>
-                <p className="text-sm text-gray-400">{feature.desc}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Pricing */}
-      <section className="px-4 py-20">
-        <div className="max-w-3xl mx-auto text-center">
-          <h2 className="text-3xl md:text-4xl font-bold mb-8">{t('pricing.title')}</h2>
-          <div className="bg-gray-50 p-8 md:p-12 rounded-lg">
-            <div className="text-5xl md:text-6xl font-bold mb-4">{t('pricing.free')}</div>
-            <p className="text-xl text-gray-600 mb-6">{t('pricing.noFees')}</p>
-            <div className="border-t border-gray-200 pt-6 mt-6">
-              <p className="text-lg mb-2">{t('pricing.payWhen')}</p>
-              <p className="text-2xl font-bold mb-2">{t('pricing.perOrder')}</p>
-              {t('pricing.auto') && <p className="text-gray-600">{t('pricing.auto')}</p>}
-            </div>
-            <div className="mt-8">
-              <Link
-                href="/seller/signup"
-                className="inline-block bg-black text-white px-8 py-4 text-lg font-medium hover:bg-gray-800 transition-colors"
-              >
-                {t('pricing.cta')}
-              </Link>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* FAQ */}
-      <section className="px-4 py-20 bg-gray-50">
-        <div className="max-w-3xl mx-auto">
-          <h2 className="text-3xl md:text-4xl font-bold text-center mb-12">{t('faq.title')}</h2>
-          <div className="space-y-4">
-            {faqs.map((faq, i) => (
-              <div key={i} className="bg-white border border-gray-200">
-                <button
-                  onClick={() => setOpenFaq(openFaq === i ? null : i)}
-                  className="w-full px-6 py-4 text-left flex justify-between items-center"
-                >
-                  <span className="font-medium">{faq.q}</span>
-                  <svg
-                    className={`w-5 h-5 transition-transform ${openFaq === i ? 'rotate-180' : ''}`}
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                  </svg>
-                </button>
-                {openFaq === i && (
-                  <div className="px-6 pb-4 text-gray-600">
-                    {faq.a}
-                  </div>
-                )}
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Final CTA */}
-      <section className="px-4 py-20">
-        <div className="max-w-3xl mx-auto text-center">
-          <h2 className="text-3xl md:text-4xl font-bold mb-6">{t('cta.title')}</h2>
-          <p className="text-lg text-gray-600 mb-8">{t('cta.subtitle')}</p>
-          <Link
-            href="/seller/signup"
-            className="inline-block bg-black text-white px-8 py-4 text-lg font-medium hover:bg-gray-800 transition-colors"
-          >
-            {t('cta.button')}
+        {/* CTA Buttons */}
+        <div className="flex flex-col gap-3 mb-12 animate-fade-up" style={{ animationDelay: '0.4s' }}>
+          <Link href="/seller/signup" className="btn-primary w-full text-center">
+            เริ่มต้นฟรี
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M17 8l4 4m0 0l-4 4m4-4H3" />
+            </svg>
+          </Link>
+          <Link href="/seller/login" className="btn-secondary w-full text-center">
+            เข้าสู่ระบบ
           </Link>
         </div>
-      </section>
 
-      {/* Footer */}
-      <footer className="px-4 py-12 bg-black text-white">
-        <div className="max-w-5xl mx-auto">
-          <div className="grid md:grid-cols-4 gap-8 mb-8">
-            <div>
-              <div className="text-2xl font-bold mb-4">TapShop</div>
-              <p className="text-gray-400 text-sm">{t('footer.tagline')}</p>
-            </div>
-            <div>
-              <div className="font-medium mb-3">{t('footer.links')}</div>
-              <ul className="space-y-2 text-sm text-gray-400">
-                <li><Link href="/about" className="hover:text-white">{t('footer.about')}</Link></li>
-                <li><Link href="/secure" className="hover:text-white">{t('footer.security')}</Link></li>
-                <li><Link href="/contact" className="hover:text-white">{t('footer.contact')}</Link></li>
-              </ul>
-            </div>
-            <div>
-              <div className="font-medium mb-3">{t('footer.forSellers')}</div>
-              <ul className="space-y-2 text-sm text-gray-400">
-                <li><Link href="/seller/signup" className="hover:text-white">{t('footer.createShop')}</Link></li>
-                <li><Link href="/seller/login" className="hover:text-white">{t('footer.login')}</Link></li>
-              </ul>
-            </div>
-            <div>
-              <div className="font-medium mb-3">{t('footer.contactUs')}</div>
-              <ul className="space-y-2 text-sm text-gray-400">
-                <li>LINE: @tapshop</li>
-                <li>support@tapshop.me</li>
-              </ul>
+        {/* Features Grid */}
+        <div className="space-y-4 mb-10">
+          {/* Feature 1 */}
+          <div className="glass-card p-6 animate-card animate-card-1">
+            <div className="flex items-start gap-4">
+              <div className="icon-box green flex-shrink-0">
+                <span className="text-2xl">🏪</span>
+              </div>
+              <div className="relative z-10">
+                <h3 className="text-[17px] font-bold text-[#1a1a1a] mb-1">สร้างร้านใน 2 นาที</h3>
+                <p className="text-[14px] text-[#7a6f63] leading-relaxed">
+                  ใส่ชื่อร้าน เพิ่มสินค้า พร้อมขาย<br />ไม่ต้องรู้โค้ด ไม่ต้องเซ็ตอัพอะไร
+                </p>
+              </div>
             </div>
           </div>
-          <div className="border-t border-gray-800 pt-8 text-center text-sm text-gray-500">
-            © 2025 TapShop. All rights reserved.
+
+          {/* Feature 2 */}
+          <div className="glass-card p-6 animate-card animate-card-2">
+            <div className="flex items-start gap-4">
+              <div className="icon-box green flex-shrink-0 animate-bounce-gentle">
+                <span className="text-2xl">🚀</span>
+              </div>
+              <div className="relative z-10">
+                <h3 className="text-[17px] font-bold text-[#1a1a1a] mb-1">ส่งด่วนใน กทม.</h3>
+                <p className="text-[14px] text-[#7a6f63] leading-relaxed">
+                  ไรเดอร์มารับสินค้าถึงหน้าบ้าน<br />ส่งถึงลูกค้าภายใน 1-2 ชั่วโมง
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* Feature 3 */}
+          <div className="glass-card p-6 animate-card animate-card-3">
+            <div className="flex items-start gap-4">
+              <div className="icon-box green flex-shrink-0">
+                <span className="text-2xl">💵</span>
+              </div>
+              <div className="relative z-10">
+                <h3 className="text-[17px] font-bold text-[#1a1a1a] mb-1">รับเงินผ่าน PromptPay</h3>
+                <p className="text-[14px] text-[#7a6f63] leading-relaxed">
+                  ลูกค้าจ่ายค่าสินค้าผ่าน QR<br />จ่ายค่าส่งให้ไรเดอร์ตอนรับของ
+                </p>
+              </div>
+            </div>
           </div>
         </div>
-      </footer>
+
+        {/* What You Do Section */}
+        <div className="glass-card p-6 mb-4 animate-card animate-card-4">
+          <h3 className="section-title relative z-10">สิ่งที่คุณทำ</h3>
+          <div className="flex flex-col gap-3.5 relative z-10">
+            {['เพิ่มสินค้า ตั้งราคา', 'แชร์ลิงก์ให้ลูกค้า', 'เตรียมของรอไรเดอร์มารับ'].map((item, i) => (
+              <div key={i} className="flex items-center gap-3 text-[15px] text-[#1a1a1a]">
+                <span className="w-7 h-7 rounded-full bg-gradient-to-br from-[#22c55e] to-[#16a34a] flex items-center justify-center flex-shrink-0 shadow-md">
+                  <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
+                  </svg>
+                </span>
+                <span className="font-medium">{item}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* What We Do Section */}
+        <div className="glass-card p-6 mb-4 animate-card animate-card-5">
+          <h3 className="section-title relative z-10">สิ่งที่เราทำ</h3>
+          <div className="flex flex-col gap-3.5 relative z-10">
+            {[
+              'รับออเดอร์จากลูกค้า',
+              'ส่งไรเดอร์ไปรับของ',
+              'จัดส่งถึงลูกค้า',
+              'เก็บเงินค่าส่งปลายทาง'
+            ].map((item, i) => (
+              <div key={i} className="flex items-center gap-3 text-[15px] text-[#1a1a1a]">
+                <span className="w-7 h-7 rounded-full bg-gradient-to-br from-[#22c55e] to-[#16a34a] flex items-center justify-center flex-shrink-0 shadow-md">
+                  <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
+                  </svg>
+                </span>
+                <span className="font-medium">{item}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Cost Section */}
+        <div className="glass-card p-6 mb-10 animate-card" style={{ animationDelay: '0.6s' }}>
+          <h3 className="section-title relative z-10">ค่าใช้จ่าย</h3>
+          <p className="text-[15px] text-[#7a6f63] leading-relaxed relative z-10">
+            <span className="text-[#1a1a1a] font-bold">ไม่มีค่ารายเดือน ไม่มีค่าสมัคร</span><br />
+            จ่ายแค่ค่าส่งเมื่อมีออเดอร์
+          </p>
+        </div>
+
+        {/* Footer */}
+        <div className="text-center text-xs text-[rgba(166,154,140,0.7)]">
+          <p className="mb-2">© 2025 TapShop • สร้างด้วย ❤️ ใน กรุงเทพฯ</p>
+          <Link href="/terms" className="hover:text-[#7a6f63] transition-colors">
+            ข้อกำหนดและเงื่อนไข
+          </Link>
+        </div>
+      </div>
     </div>
   )
 }

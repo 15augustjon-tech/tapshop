@@ -45,7 +45,7 @@ export async function uploadProductImage(
   const fileName = `${sellerId}/${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`
 
   // Upload to Supabase Storage
-  const { data, error } = await supabase.storage
+  const { error } = await supabase.storage
     .from(BUCKET_NAME)
     .upload(fileName, file, {
       cacheControl: '3600',

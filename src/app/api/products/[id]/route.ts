@@ -245,8 +245,10 @@ export async function DELETE(
       .eq('product_id', productId)
 
     if (!orderCheckError && pendingOrderItems) {
-      const hasPendingOrders = pendingOrderItems.some((item: any) => {
-        const status = item.order?.status
+      const hasPendingOrders = pendingOrderItems.some((item: { order?: { status?: string }[] | { status?: string } }) => {
+        // Handle both array and object forms of the relation
+        const orderData = Array.isArray(item.order) ? item.order[0] : item.order
+        const status = orderData?.status
         return status === 'pending' || status === 'confirmed' || status === 'shipping'
       })
 

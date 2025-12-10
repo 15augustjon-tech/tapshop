@@ -132,17 +132,17 @@ export default function ShopQRCode({
   return (
     <div className="text-center">
       {showTitle && (
-        <h3 className="text-lg font-semibold mb-2">{title}</h3>
+        <h3 className="text-lg font-semibold text-[#1a1a1a] mb-2">{title}</h3>
       )}
 
       {instruction && (
-        <p className="text-secondary text-sm mb-4">{instruction}</p>
+        <p className="text-[#7a6f63] text-sm mb-4">{instruction}</p>
       )}
 
       {/* QR Code */}
       <div
         ref={qrRef}
-        className="inline-block p-4 bg-white rounded-xl border border-border mb-4"
+        className="inline-block p-4 bg-white rounded-[16px] border border-[#e8e2da] mb-4"
       >
         <QRCodeCanvas
           value={shopUrl}
@@ -153,7 +153,7 @@ export default function ShopQRCode({
       </div>
 
       {/* Shop URL */}
-      <p className="text-sm font-medium text-secondary mb-4">{displayUrl}</p>
+      <p className="text-sm font-medium text-[#7a6f63] mb-4">{displayUrl}</p>
 
       {/* Action Buttons */}
       <div className="flex items-center justify-center gap-3">
@@ -161,7 +161,7 @@ export default function ShopQRCode({
         <button
           onClick={handleDownload}
           disabled={downloading}
-          className="p-3 bg-black text-white rounded-lg hover:bg-neutral-800 transition-colors disabled:opacity-50"
+          className="p-3 bg-[#1a1a1a] text-white rounded-[12px] hover:bg-[#333] transition-colors disabled:opacity-50"
           title="ดาวน์โหลด QR"
         >
           {downloading ? (
@@ -176,7 +176,7 @@ export default function ShopQRCode({
         {/* Copy Button (text) */}
         <button
           onClick={handleCopy}
-          className="px-4 py-3 border border-border rounded-lg hover:bg-neutral-50 transition-colors font-medium text-sm"
+          className="px-4 py-3 border border-[#e8e2da] text-[#1a1a1a] rounded-[12px] hover:bg-white/50 transition-colors font-medium text-sm"
         >
           {copied ? 'คัดลอกแล้ว' : 'คัดลอก'}
         </button>

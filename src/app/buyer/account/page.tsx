@@ -26,10 +26,6 @@ export default function BuyerAccountPage() {
   const [loading, setLoading] = useState(true)
   const [loggingOut, setLoggingOut] = useState(false)
 
-  useEffect(() => {
-    fetchBuyer()
-  }, [])
-
   const fetchBuyer = async () => {
     try {
       const res = await fetch('/api/auth/buyer/me')
@@ -50,6 +46,11 @@ export default function BuyerAccountPage() {
       setLoading(false)
     }
   }
+
+  useEffect(() => {
+    fetchBuyer()
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   const handleLogout = async () => {
     if (loggingOut) return

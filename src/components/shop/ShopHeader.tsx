@@ -7,27 +7,44 @@ interface ShopHeaderProps {
 }
 
 export default function ShopHeader({ shopName, cartCount, onCartClick }: ShopHeaderProps) {
-  return (
-    <header className="sticky top-0 bg-white border-b border-border z-30">
-      <div className="flex items-center justify-between px-[5%] h-[60px]">
-        {/* Shop Name */}
-        <h1 className="text-lg font-bold truncate">{shopName}</h1>
+  // Get first character for avatar
+  const initial = shopName?.charAt(0)?.toUpperCase() || 'S'
 
-        {/* Cart Icon */}
-        <button
-          onClick={onCartClick}
-          className="relative p-2 -mr-2 hover:bg-neutral-100 rounded-full transition-colors"
-        >
-          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
-          </svg>
-          {/* Badge */}
-          {cartCount > 0 && (
-            <span className="absolute -top-0.5 -right-0.5 min-w-[20px] h-5 px-1.5 bg-black text-white text-xs font-bold rounded-full flex items-center justify-center">
-              {cartCount > 99 ? '99+' : cartCount}
-            </span>
-          )}
-        </button>
+  return (
+    <header className="sticky top-0 z-30 px-4 pt-4">
+      <div className="glass-card !rounded-[20px] px-4 py-3">
+        <div className="flex items-center justify-between relative z-10">
+          {/* Shop Info */}
+          <div className="flex items-center gap-3">
+            {/* Avatar */}
+            <div className="avatar w-11 h-11 text-lg animate-pop" style={{ animationDelay: '0.2s' }}>
+              {initial}
+            </div>
+            <div>
+              <h1 className="text-[17px] font-bold text-[#1a1a1a] leading-tight">{shopName}</h1>
+              <div className="flex items-center gap-1.5 text-[12px] text-[#7a6f63]">
+                <span className="w-1.5 h-1.5 bg-[#22c55e] rounded-full animate-pulse-dot" />
+                <span>ร้านยืนยันแล้ว</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Cart Button */}
+          <button
+            onClick={onCartClick}
+            className="relative w-12 h-12 glass-card-inner !rounded-full flex items-center justify-center hover:scale-110 transition-all duration-300"
+          >
+            <svg className="w-[22px] h-[22px] text-[#1a1a1a]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+            </svg>
+            {/* Badge */}
+            {cartCount > 0 && (
+              <span className="absolute -top-1 -right-1 min-w-[22px] h-[22px] px-1.5 bg-gradient-to-br from-[#1a1a1a] to-[#2d2d2d] text-white text-[11px] font-bold rounded-full flex items-center justify-center shadow-lg animate-pop">
+                {cartCount > 99 ? '99+' : cartCount}
+              </span>
+            )}
+          </button>
+        </div>
       </div>
     </header>
   )

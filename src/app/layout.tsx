@@ -1,20 +1,22 @@
 import type { Metadata } from "next";
-import { Inter, Noto_Sans_Thai } from "next/font/google";
+import { Inter } from "next/font/google";
+import localFont from "next/font/local";
 import "./globals.css";
 import { I18nProvider } from "@/lib/i18n";
 
-// English font
+// English font (Inter from Google)
 const inter = Inter({
   variable: "--font-inter",
   subsets: ["latin"],
   display: "swap",
 });
 
-// Thai font
-const notoSansThai = Noto_Sans_Thai({
-  variable: "--font-noto-thai",
-  subsets: ["thai"],
+// Thai font (Grab's Inter Thai Extension - loopless variant)
+const interThai = localFont({
+  src: "../../public/fonts/InterThaiLoopless-Variable.ttf",
+  variable: "--font-inter-thai",
   display: "swap",
+  weight: "100 900",
 });
 
 export const metadata: Metadata = {
@@ -38,7 +40,7 @@ export default function RootLayout({
   return (
     <html lang="th">
       <body
-        className={`${inter.variable} ${notoSansThai.variable} font-sans antialiased bg-white text-black`}
+        className={`${inter.variable} ${interThai.variable} font-sans antialiased bg-white text-black`}
       >
         <I18nProvider>
           {children}

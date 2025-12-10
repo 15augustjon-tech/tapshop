@@ -30,6 +30,8 @@ export async function createServerSupabaseClient() {
 
 // Service role client for admin operations (bypasses RLS)
 export function createServiceRoleClient() {
+  // Using dynamic import pattern to avoid bundling service role key
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
   const { createClient } = require('@supabase/supabase-js')
 
   return createClient(

@@ -31,11 +31,11 @@ interface OrderCardProps {
 }
 
 const STATUS_CONFIG = {
-  pending: { label: 'รอยืนยัน', bg: 'bg-yellow-100', text: 'text-yellow-800' },
-  confirmed: { label: 'ยืนยันแล้ว', bg: 'bg-blue-100', text: 'text-blue-800' },
-  shipping: { label: 'กำลังส่ง', bg: 'bg-orange-100', text: 'text-orange-800' },
-  delivered: { label: 'ส่งแล้ว', bg: 'bg-green-100', text: 'text-green-800' },
-  cancelled: { label: 'ยกเลิก', bg: 'bg-red-100', text: 'text-red-800' }
+  pending: { label: 'รอยืนยัน', bg: 'bg-gradient-to-r from-[#f59e0b]/20 to-[#f59e0b]/10', text: 'text-[#b45309]', border: 'border-[#f59e0b]/30' },
+  confirmed: { label: 'ยืนยันแล้ว', bg: 'bg-gradient-to-r from-[#3b82f6]/20 to-[#3b82f6]/10', text: 'text-[#1d4ed8]', border: 'border-[#3b82f6]/30' },
+  shipping: { label: 'กำลังส่ง', bg: 'bg-gradient-to-r from-[#f97316]/20 to-[#f97316]/10', text: 'text-[#c2410c]', border: 'border-[#f97316]/30' },
+  delivered: { label: 'ส่งแล้ว', bg: 'bg-gradient-to-r from-[#22c55e]/20 to-[#22c55e]/10', text: 'text-[#15803d]', border: 'border-[#22c55e]/30' },
+  cancelled: { label: 'ยกเลิก', bg: 'bg-gradient-to-r from-[#ef4444]/20 to-[#ef4444]/10', text: 'text-[#b91c1c]', border: 'border-[#ef4444]/30' }
 }
 
 function formatRelativeTime(dateString: string): string {
@@ -70,22 +70,22 @@ export default function OrderCard({ order, onStatusChange }: OrderCardProps) {
   const firstName = order.customer_name?.split(' ')[0] || 'ลูกค้า'
 
   return (
-    <div className="border border-border rounded-xl overflow-hidden">
+    <div className="glass-card !rounded-[20px] overflow-hidden">
       {/* Main card - always visible */}
       <button
         onClick={() => setExpanded(!expanded)}
-        className="w-full p-4 text-left hover:bg-neutral-50 transition-colors"
+        className="w-full p-4 text-left hover:bg-white/30 transition-colors"
       >
         {/* Top row: Order ID + Status */}
-        <div className="flex items-center justify-between mb-2">
-          <span className="font-mono text-sm">{order.order_number}</span>
-          <span className={`px-2 py-1 rounded-full text-xs font-medium ${statusConfig.bg} ${statusConfig.text}`}>
+        <div className="flex items-center justify-between mb-3">
+          <span className="font-mono text-sm text-[#7a6f63]">{order.order_number}</span>
+          <span className={`px-3 py-1 rounded-full text-xs font-semibold ${statusConfig.bg} ${statusConfig.text} border ${statusConfig.border}`}>
             {statusConfig.label}
           </span>
         </div>
 
         {/* Product info */}
-        <p className="font-medium mb-1">
+        <p className="font-semibold text-[#1a1a1a] mb-1.5">
           {firstItem?.product_name || 'สินค้า'}
           {itemCount > 1 ? ` และอีก ${itemCount - 1} รายการ` : ''}
           {' '}x {totalQty}
@@ -93,14 +93,14 @@ export default function OrderCard({ order, onStatusChange }: OrderCardProps) {
 
         {/* Price + Customer + Time */}
         <div className="flex items-center justify-between text-sm">
-          <span className="font-semibold">฿{formatCurrency(order.total)}</span>
-          <span className="text-secondary">{firstName} • {formatRelativeTime(order.created_at)}</span>
+          <span className="font-bold text-lg text-[#1a1a1a]">฿{formatCurrency(order.total)}</span>
+          <span className="text-[#7a6f63]">{firstName} • {formatRelativeTime(order.created_at)}</span>
         </div>
 
         {/* Expand indicator */}
-        <div className="flex justify-center mt-2">
+        <div className="flex justify-center mt-3">
           <svg
-            className={`w-5 h-5 text-secondary transition-transform ${expanded ? 'rotate-180' : ''}`}
+            className={`w-5 h-5 text-[#a69a8c] transition-transform ${expanded ? 'rotate-180' : ''}`}
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"
@@ -112,60 +112,70 @@ export default function OrderCard({ order, onStatusChange }: OrderCardProps) {
 
       {/* Expanded content */}
       {expanded && (
-        <div className="border-t border-border p-4 bg-neutral-50 space-y-4">
+        <div className="border-t border-white/50 p-4 bg-white/20 space-y-4">
           {/* Order items */}
-          <div>
-            <p className="text-sm font-medium mb-2">รายการสั่งซื้อ</p>
+          <div className="glass-card-inner !rounded-[14px] p-4">
+            <p className="text-sm font-semibold text-[#1a1a1a] mb-3">รายการสั่งซื้อ</p>
             {order.order_items?.map((item) => (
-              <div key={item.id} className="flex justify-between text-sm py-1">
-                <span>{item.product_name} x {item.quantity}</span>
-                <span>฿{formatCurrency(item.product_price * item.quantity)}</span>
+              <div key={item.id} className="flex justify-between text-sm py-1.5">
+                <span className="text-[#1a1a1a]">{item.product_name} x {item.quantity}</span>
+                <span className="font-medium text-[#1a1a1a]">฿{formatCurrency(item.product_price * item.quantity)}</span>
               </div>
             ))}
-            <div className="flex justify-between font-medium pt-2 border-t border-border mt-2">
-              <span>รวม</span>
-              <span>฿{formatCurrency(order.total)}</span>
+            <div className="flex justify-between font-bold pt-3 border-t border-white/50 mt-3">
+              <span className="text-[#1a1a1a]">รวม</span>
+              <span className="text-[#1a1a1a]">฿{formatCurrency(order.total)}</span>
             </div>
           </div>
 
           {/* Customer info */}
-          <div>
-            <p className="text-sm font-medium mb-2">ข้อมูลลูกค้า</p>
-            <p className="text-sm">{order.customer_name}</p>
+          <div className="glass-card-inner !rounded-[14px] p-4">
+            <p className="text-sm font-semibold text-[#1a1a1a] mb-3">ข้อมูลลูกค้า</p>
+            <p className="text-sm font-medium text-[#1a1a1a]">{order.customer_name}</p>
             <a
               href={`tel:${order.customer_phone}`}
-              className="text-sm text-blue-600 hover:underline"
+              className="text-sm text-[#1E4A99] hover:underline inline-flex items-center gap-1 my-1"
             >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+              </svg>
               {order.customer_phone}
             </a>
-            <p className="text-sm text-secondary mt-1">{order.customer_address}</p>
+            <p className="text-sm text-[#7a6f63] mt-1">{order.customer_address}</p>
             {order.delivery_notes && (
-              <p className="text-sm text-secondary mt-1">
-                <span className="font-medium">หมายเหตุ:</span> {order.delivery_notes}
+              <p className="text-sm text-[#a69a8c] mt-2 italic">
+                &quot;{order.delivery_notes}&quot;
               </p>
             )}
           </div>
 
           {/* Scheduled delivery */}
           {order.scheduled_date && (
-            <div>
-              <p className="text-sm font-medium mb-1">กำหนดส่ง</p>
-              <p className="text-sm">{order.scheduled_date} {order.scheduled_time}</p>
+            <div className="glass-card-inner !rounded-[14px] p-4 flex items-center gap-3">
+              <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#f59e0b] to-[#d97706] flex items-center justify-center flex-shrink-0">
+                <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              </div>
+              <div>
+                <p className="text-xs text-[#7a6f63]">กำหนดส่ง</p>
+                <p className="font-medium text-[#1a1a1a]">{order.scheduled_date} {order.scheduled_time}</p>
+              </div>
             </div>
           )}
 
           {/* Action buttons based on status */}
           {order.status === 'pending' && onStatusChange && (
-            <div className="flex gap-2 pt-2">
+            <div className="flex gap-3 pt-2">
               <button
                 onClick={() => onStatusChange(order.id, 'confirmed')}
-                className="flex-1 py-3 bg-black text-white font-medium rounded-lg hover:bg-neutral-800 transition-colors"
+                className="btn-primary flex-1"
               >
                 ยืนยันออเดอร์
               </button>
               <button
                 onClick={() => onStatusChange(order.id, 'cancelled')}
-                className="px-4 py-3 border border-border rounded-lg hover:bg-white transition-colors"
+                className="btn-secondary !px-5"
               >
                 ยกเลิก
               </button>
@@ -175,7 +185,7 @@ export default function OrderCard({ order, onStatusChange }: OrderCardProps) {
           {order.status === 'confirmed' && onStatusChange && (
             <button
               onClick={() => onStatusChange(order.id, 'shipping')}
-              className="w-full py-3 bg-black text-white font-medium rounded-lg hover:bg-neutral-800 transition-colors"
+              className="btn-primary w-full"
             >
               เริ่มจัดส่ง
             </button>

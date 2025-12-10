@@ -34,10 +34,6 @@ export default function BuyerOrdersPage() {
   const [orders, setOrders] = useState<Order[]>([])
   const [loading, setLoading] = useState(true)
 
-  useEffect(() => {
-    fetchOrders()
-  }, [])
-
   const fetchOrders = async () => {
     try {
       const res = await fetch('/api/buyers/me/orders')
@@ -58,6 +54,11 @@ export default function BuyerOrdersPage() {
       setLoading(false)
     }
   }
+
+  useEffect(() => {
+    fetchOrders()
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   const formatDate = (dateStr: string) => {
     const date = new Date(dateStr)

@@ -15,15 +15,15 @@ const DAYS = [
 ]
 
 const TIME_SLOTS = [
-  { value: '10:00', label: 'รอบเช้า (10:00)' },
-  { value: '14:00', label: 'รอบบ่าย (14:00)' },
-  { value: '18:00', label: 'รอบเย็น (18:00)' }
+  { value: '10:00', label: 'รอบเช้า', time: '10:00 น.' },
+  { value: '14:00', label: 'รอบบ่าย', time: '14:00 น.' },
+  { value: '18:00', label: 'รอบเย็น', time: '18:00 น.' }
 ]
 
 export default function SchedulePage() {
   const router = useRouter()
-  const [shippingDays, setShippingDays] = useState<number[]>([1, 2, 3, 4, 5]) // Mon-Fri default
-  const [shippingTime, setShippingTime] = useState('14:00') // Afternoon default
+  const [shippingDays, setShippingDays] = useState<number[]>([1, 2, 3, 4, 5])
+  const [shippingTime, setShippingTime] = useState('14:00')
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
 
@@ -62,7 +62,7 @@ export default function SchedulePage() {
       }
 
       router.push('/seller/signup/success')
-    } catch (err) {
+    } catch {
       setError('เกิดข้อผิดพลาด กรุณาลองใหม่')
     } finally {
       setLoading(false)
@@ -70,104 +70,133 @@ export default function SchedulePage() {
   }
 
   return (
-    <div className="min-h-screen bg-white px-[5%] py-8">
-      <div className="max-w-md mx-auto">
-        <ProgressBar currentStep={3} totalSteps={3} />
+    <div className="min-h-screen bg-gradient-main overflow-x-hidden">
+      {/* Ambient Lights */}
+      <div className="ambient-1" />
+      <div className="ambient-2" />
 
-        <h1 className="text-3xl font-bold mb-2">ตั้งเวลาจัดส่ง</h1>
-        <p className="text-secondary mb-8">เลือกวันและเวลาที่คุณพร้อมส่งของ</p>
+      <div className="px-4 py-8 relative z-10">
+        <div className="max-w-md mx-auto">
+          <ProgressBar currentStep={3} totalSteps={3} />
 
-        {error && (
-          <div className="mb-6 p-4 bg-red-50 text-error rounded-lg">
-            {error}
-          </div>
-        )}
+          <h1 className="text-3xl font-bold text-[#1a1a1a] mb-2">ตั้งเวลาจัดส่ง</h1>
+          <p className="text-[#7a6f63] mb-8">เลือกวันและเวลาที่คุณพร้อมส่งของ</p>
 
-        <div className="space-y-8">
-          {/* Shipping Days */}
-          <div>
-            <label className="block text-sm font-medium mb-4">วันที่เปิดให้สั่ง</label>
-            <div className="flex gap-2">
-              {DAYS.map((day) => (
-                <button
-                  key={day.value}
-                  onClick={() => toggleDay(day.value)}
-                  className={`flex-1 py-3 rounded-lg font-medium transition-colors ${
-                    shippingDays.includes(day.value)
-                      ? 'bg-black text-white'
-                      : 'bg-neutral-100 text-neutral-600 hover:bg-neutral-200'
-                  }`}
-                  title={day.fullLabel}
-                >
-                  {day.label}
-                </button>
-              ))}
+          {error && (
+            <div className="mb-6 glass-card !rounded-[16px] p-4 border border-[#ef4444]/30 bg-gradient-to-r from-[#ef4444]/10 to-[#ef4444]/5">
+              <p className="text-[#ef4444] font-medium">{error}</p>
             </div>
-            <p className="mt-2 text-sm text-secondary">
-              เลือกแล้ว: {shippingDays.length} วัน
-            </p>
-          </div>
+          )}
 
-          {/* Shipping Time */}
-          <div>
-            <label className="block text-sm font-medium mb-4">รอบจัดส่ง</label>
-            <div className="space-y-3">
-              {TIME_SLOTS.map((slot) => (
-                <label
-                  key={slot.value}
-                  className={`flex items-center p-4 border rounded-lg cursor-pointer transition-colors ${
-                    shippingTime === slot.value
-                      ? 'border-black bg-neutral-50'
-                      : 'border-border hover:border-neutral-400'
-                  }`}
-                >
-                  <input
-                    type="radio"
-                    name="shipping_time"
-                    value={slot.value}
-                    checked={shippingTime === slot.value}
-                    onChange={(e) => setShippingTime(e.target.value)}
-                    className="sr-only"
-                  />
-                  <div className={`w-5 h-5 rounded-full border-2 mr-4 flex items-center justify-center ${
-                    shippingTime === slot.value
-                      ? 'border-black'
-                      : 'border-neutral-300'
-                  }`}>
-                    {shippingTime === slot.value && (
-                      <div className="w-2.5 h-2.5 rounded-full bg-black" />
-                    )}
-                  </div>
-                  <span className="font-medium">{slot.label}</span>
-                </label>
-              ))}
+          <div className="space-y-6">
+            {/* Shipping Days */}
+            <div className="glass-card !rounded-[20px] p-5">
+              <div className="flex items-center gap-3 mb-5">
+                <div className="icon-box w-10 h-10 !rounded-[12px] !bg-gradient-to-br !from-[#8b5cf6]/20 !to-[#7c3aed]/10">
+                  <svg className="w-5 h-5 text-[#7c3aed]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                  </svg>
+                </div>
+                <div>
+                  <h2 className="font-bold text-[#1a1a1a]">วันที่เปิดให้สั่ง</h2>
+                  <p className="text-sm text-[#7a6f63]">เลือกแล้ว {shippingDays.length} วัน</p>
+                </div>
+              </div>
+              <div className="grid grid-cols-7 gap-2">
+                {DAYS.map((day) => (
+                  <button
+                    key={day.value}
+                    onClick={() => toggleDay(day.value)}
+                    className={`aspect-square flex items-center justify-center rounded-[12px] font-medium text-sm transition-all ${
+                      shippingDays.includes(day.value)
+                        ? 'bg-[#1a1a1a] text-white shadow-lg'
+                        : 'glass-card-inner hover:bg-white/60 text-[#7a6f63]'
+                    }`}
+                    title={day.fullLabel}
+                  >
+                    {day.label}
+                  </button>
+                ))}
+              </div>
             </div>
-          </div>
 
-          {/* Info Box */}
-          <div className="flex gap-3 p-4 bg-blue-50 rounded-lg">
-            <div className="text-xl">⏰</div>
-            <p className="text-sm text-neutral-700">
-              เราจะส่งข้อความเตือนคุณ 1 ชั่วโมงก่อนเวลาจัดส่ง เพื่อให้คุณยืนยันออเดอร์
-            </p>
-          </div>
+            {/* Shipping Time */}
+            <div className="glass-card !rounded-[20px] p-5">
+              <div className="flex items-center gap-3 mb-5">
+                <div className="icon-box w-10 h-10 !rounded-[12px] !bg-gradient-to-br !from-[#f59e0b]/20 !to-[#d97706]/10">
+                  <svg className="w-5 h-5 text-[#d97706]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                </div>
+                <h2 className="font-bold text-[#1a1a1a]">รอบจัดส่ง</h2>
+              </div>
+              <div className="space-y-2">
+                {TIME_SLOTS.map((slot) => (
+                  <button
+                    key={slot.value}
+                    onClick={() => setShippingTime(slot.value)}
+                    className={`w-full glass-card-inner !rounded-[14px] p-4 flex items-center gap-4 transition-all ${
+                      shippingTime === slot.value
+                        ? 'ring-2 ring-[#1a1a1a] bg-white/60'
+                        : 'hover:bg-white/60'
+                    }`}
+                  >
+                    <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all ${
+                      shippingTime === slot.value
+                        ? 'border-[#1a1a1a] bg-[#1a1a1a]'
+                        : 'border-[#a69a8c]'
+                    }`}>
+                      {shippingTime === slot.value && (
+                        <div className="w-2 h-2 rounded-full bg-white" />
+                      )}
+                    </div>
+                    <div className="flex-1 text-left">
+                      <p className="font-semibold text-[#1a1a1a]">{slot.label}</p>
+                      <p className="text-sm text-[#7a6f63]">{slot.time}</p>
+                    </div>
+                  </button>
+                ))}
+              </div>
+            </div>
 
-          {/* Buttons */}
-          <div className="flex gap-4 pt-4">
-            <button
-              onClick={() => router.back()}
-              disabled={loading}
-              className="flex-1 py-4 border border-border rounded-lg font-semibold hover:bg-neutral-50 transition-colors disabled:opacity-50"
-            >
-              ย้อนกลับ
-            </button>
-            <button
-              onClick={handleSubmit}
-              disabled={loading || shippingDays.length === 0}
-              className="flex-1 py-4 bg-black text-white font-semibold rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-neutral-800 transition-colors"
-            >
-              {loading ? 'กำลังบันทึก...' : 'เสร็จสิ้น'}
-            </button>
+            {/* Info Box */}
+            <div className="glass-card !rounded-[16px] p-4 border border-[#3b82f6]/30 bg-gradient-to-r from-[#3b82f6]/10 to-[#3b82f6]/5">
+              <div className="flex gap-3">
+                <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[#3b82f6] to-[#2563eb] flex items-center justify-center flex-shrink-0">
+                  <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                </div>
+                <p className="text-sm text-[#1a1a1a]">
+                  เราจะส่งข้อความเตือนคุณ 1 ชั่วโมงก่อนเวลาจัดส่ง เพื่อให้คุณยืนยันออเดอร์
+                </p>
+              </div>
+            </div>
+
+            {/* Buttons */}
+            <div className="flex gap-4 pt-4">
+              <button
+                onClick={() => router.back()}
+                disabled={loading}
+                className="btn-secondary flex-1 !py-4"
+              >
+                ย้อนกลับ
+              </button>
+              <button
+                onClick={handleSubmit}
+                disabled={loading || shippingDays.length === 0}
+                className="btn-primary flex-1 !py-4"
+              >
+                {loading ? (
+                  <span className="flex items-center justify-center gap-2">
+                    <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                    บันทึก...
+                  </span>
+                ) : (
+                  'เสร็จสิ้น'
+                )}
+              </button>
+            </div>
           </div>
         </div>
       </div>

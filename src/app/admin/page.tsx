@@ -94,29 +94,32 @@ export default function AdminDashboard() {
   // Load data based on active tab
   useEffect(() => {
     if (!authChecked) return
-    setLoading(true)
-    if (activeTab === 'orders') {
-      const url = statusFilter
-        ? `/api/admin/orders?status=${statusFilter}`
-        : '/api/admin/orders'
-      fetch(url)
-        .then(res => res.json())
-        .then(data => {
-          if (data.success) setOrders(data.orders)
-          setLoading(false)
-        })
-        .catch(() => setLoading(false))
-    } else if (activeTab === 'sellers') {
-      fetch('/api/admin/sellers')
-        .then(res => res.json())
-        .then(data => {
-          if (data.success) setSellers(data.sellers)
-          setLoading(false)
-        })
-        .catch(() => setLoading(false))
-    } else {
-      setLoading(false)
+    const loadData = () => {
+      setLoading(true)
+      if (activeTab === 'orders') {
+        const url = statusFilter
+          ? `/api/admin/orders?status=${statusFilter}`
+          : '/api/admin/orders'
+        fetch(url)
+          .then(res => res.json())
+          .then(data => {
+            if (data.success) setOrders(data.orders)
+            setLoading(false)
+          })
+          .catch(() => setLoading(false))
+      } else if (activeTab === 'sellers') {
+        fetch('/api/admin/sellers')
+          .then(res => res.json())
+          .then(data => {
+            if (data.success) setSellers(data.sellers)
+            setLoading(false)
+          })
+          .catch(() => setLoading(false))
+      } else {
+        setLoading(false)
+      }
     }
+    loadData()
   }, [activeTab, statusFilter, authChecked])
 
   const handleCancelOrder = async (orderId: string) => {

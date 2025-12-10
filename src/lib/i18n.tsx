@@ -283,10 +283,13 @@ export function I18nProvider({ children }: { children: ReactNode }) {
   const [lang, setLangState] = useState<Language>('th')
 
   useEffect(() => {
-    const saved = localStorage.getItem('tapshop_lang') as Language
-    if (saved && (saved === 'th' || saved === 'en')) {
-      setLangState(saved)
+    const loadLang = () => {
+      const saved = localStorage.getItem('tapshop_lang') as Language
+      if (saved && (saved === 'th' || saved === 'en')) {
+        setLangState(saved)
+      }
     }
+    loadLang()
   }, [])
 
   const setLang = (newLang: Language) => {

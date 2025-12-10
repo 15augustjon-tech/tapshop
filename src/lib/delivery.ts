@@ -51,7 +51,7 @@ export function getNextDeliverySlot(
   const [shippingHour, shippingMinute] = (seller.shipping_time || '14:00').split(':').map(Number)
 
   // Start checking from today
-  let checkDate = new Date(orderTime)
+  const checkDate = new Date(orderTime)
 
   // Check up to 14 days ahead
   for (let i = 0; i < 14; i++) {

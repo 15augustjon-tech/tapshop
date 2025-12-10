@@ -207,7 +207,7 @@ export default function AddressAutocomplete({
         type="button"
         onClick={handleGetCurrentLocation}
         disabled={!isLoaded || gettingLocation}
-        className="w-full py-4 px-4 bg-black text-white rounded-lg font-semibold flex items-center justify-center gap-3 hover:bg-neutral-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+        className="w-full py-4 px-4 bg-[#1a1a1a] text-white rounded-[12px] font-semibold flex items-center justify-center gap-3 hover:bg-[#333] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
       >
         {gettingLocation ? (
           <>
@@ -229,12 +229,12 @@ export default function AddressAutocomplete({
       </button>
 
       {locationError && (
-        <p className="text-sm text-error text-center">{locationError}</p>
+        <p className="text-sm text-[#ef4444] text-center">{locationError}</p>
       )}
 
       {/* Success indicator */}
       {hasLocation && !gettingLocation && (
-        <div className="flex items-center gap-2 p-3 bg-green-50 text-green-700 rounded-lg">
+        <div className="flex items-center gap-2 p-3 bg-[rgba(34,197,94,0.1)] text-[#22c55e] rounded-[12px]">
           <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <path d="M20 6 9 17l-5-5"/>
           </svg>
@@ -244,9 +244,9 @@ export default function AddressAutocomplete({
 
       {/* Divider */}
       <div className="flex items-center gap-3">
-        <div className="flex-1 h-px bg-border" />
-        <span className="text-sm text-secondary">หรือค้นหาที่อยู่</span>
-        <div className="flex-1 h-px bg-border" />
+        <div className="flex-1 h-px bg-[#e8e2da]" />
+        <span className="text-sm text-[#7a6f63]">หรือค้นหาที่อยู่</span>
+        <div className="flex-1 h-px bg-[#e8e2da]" />
       </div>
 
       {/* Address Input */}
@@ -256,25 +256,25 @@ export default function AddressAutocomplete({
         value={inputValue}
         onChange={handleInputChange}
         placeholder="พิมพ์ชื่อสถานที่ ถนน หรือซอย..."
-        className={`w-full px-4 py-3 border ${error ? 'border-error' : 'border-border'} rounded-lg outline-none focus:ring-2 focus:ring-black focus:ring-offset-1`}
+        className={`w-full px-4 py-3.5 border ${error ? 'border-[#ef4444]' : 'border-[#e8e2da]'} rounded-[12px] bg-white/50 text-[#1a1a1a] placeholder:text-[#a69a8c] outline-none focus:ring-2 focus:ring-[#1a1a1a] focus:ring-offset-1`}
         disabled={!isLoaded && !loadError}
       />
 
       {/* Display selected address */}
       {hasLocation && inputValue && (
-        <p className="text-sm text-secondary px-1">
+        <p className="text-sm text-[#7a6f63] px-1">
           📍 {inputValue}
         </p>
       )}
 
       {error && (
-        <p className="text-sm text-error">{error}</p>
+        <p className="text-sm text-[#ef4444]">{error}</p>
       )}
       {!isLoaded && !loadError && (
-        <p className="text-sm text-secondary">กำลังโหลดแผนที่...</p>
+        <p className="text-sm text-[#7a6f63]">กำลังโหลดแผนที่...</p>
       )}
       {loadError && (
-        <p className="text-sm text-error">ไม่สามารถโหลดแผนที่ได้ กรุณารีเฟรชหน้า</p>
+        <p className="text-sm text-[#ef4444]">ไม่สามารถโหลดแผนที่ได้ กรุณารีเฟรชหน้า</p>
       )}
     </div>
   )

@@ -21,7 +21,6 @@ export default function ShopInfoPage() {
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [loading, setLoading] = useState(false)
 
-  // Auto-generate slug from shop name
   useEffect(() => {
     if (!slugEdited && formData.shop_name) {
       const generatedSlug = slugify(formData.shop_name)
@@ -29,7 +28,6 @@ export default function ShopInfoPage() {
     }
   }, [formData.shop_name, slugEdited])
 
-  // Check slug availability with debounce
   useEffect(() => {
     if (!formData.shop_slug || formData.shop_slug.length < 3) {
       setSlugStatus(null)
@@ -123,11 +121,9 @@ export default function ShopInfoPage() {
         return
       }
 
-      // Save to localStorage for state persistence
       localStorage.setItem('seller_shop_slug', formData.shop_slug)
-
       router.push('/seller/signup/schedule')
-    } catch (err) {
+    } catch {
       setErrors({ general: 'เกิดข้อผิดพลาด กรุณาลองใหม่' })
     } finally {
       setLoading(false)
@@ -135,121 +131,169 @@ export default function ShopInfoPage() {
   }
 
   return (
-    <div className="min-h-screen bg-white px-[5%] py-8">
-      <div className="max-w-md mx-auto">
-        <ProgressBar currentStep={2} totalSteps={3} />
+    <div className="min-h-screen bg-gradient-main overflow-x-hidden">
+      {/* Ambient Lights */}
+      <div className="ambient-1" />
+      <div className="ambient-2" />
 
-        <h1 className="text-3xl font-bold mb-8">ข้อมูลร้านค้า</h1>
+      <div className="px-4 py-8 relative z-10">
+        <div className="max-w-md mx-auto">
+          <ProgressBar currentStep={2} totalSteps={3} />
 
-        {errors.general && (
-          <div className="mb-6 p-4 bg-red-50 text-error rounded-lg">
-            {errors.general}
-          </div>
-        )}
+          <h1 className="text-3xl font-bold text-[#1a1a1a] mb-2">ข้อมูลร้านค้า</h1>
+          <p className="text-[#7a6f63] mb-8">กรอกข้อมูลเพื่อสร้างร้านค้าของคุณ</p>
 
-        <div className="space-y-6">
-          {/* Shop Name */}
-          <div>
-            <label className="block text-sm font-medium mb-2">ชื่อร้าน</label>
-            <input
-              type="text"
-              value={formData.shop_name}
-              onChange={(e) => setFormData(prev => ({ ...prev, shop_name: e.target.value }))}
-              placeholder="ร้านเสื้อผ้าสมชาย"
-              maxLength={50}
-              className={`w-full px-4 py-3 border ${errors.shop_name ? 'border-error' : 'border-border'} rounded-lg outline-none focus:ring-2 focus:ring-black focus:ring-offset-1`}
-            />
-            {errors.shop_name && (
-              <p className="mt-2 text-sm text-error">{errors.shop_name}</p>
-            )}
-          </div>
+          {errors.general && (
+            <div className="mb-6 glass-card !rounded-[16px] p-4 border border-[#ef4444]/30 bg-gradient-to-r from-[#ef4444]/10 to-[#ef4444]/5">
+              <p className="text-[#ef4444] font-medium">{errors.general}</p>
+            </div>
+          )}
 
-          {/* Shop URL */}
-          <div>
-            <label className="block text-sm font-medium mb-2">ลิงก์ร้านค้า</label>
-            <div className={`flex items-center border ${errors.shop_slug ? 'border-error' : 'border-border'} rounded-lg overflow-hidden focus-within:ring-2 focus-within:ring-black focus-within:ring-offset-1`}>
-              <span className="px-4 py-3 bg-neutral-50 text-secondary border-r border-border whitespace-nowrap">
-                tapshop.me/
-              </span>
+          <div className="space-y-6">
+            {/* Shop Name */}
+            <div className="glass-card !rounded-[20px] p-5">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="icon-box w-10 h-10 !rounded-[12px]">
+                  <svg className="w-5 h-5 text-[#7a6f63]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                  </svg>
+                </div>
+                <h2 className="font-bold text-[#1a1a1a]">ชื่อร้าน</h2>
+              </div>
               <input
                 type="text"
-                value={formData.shop_slug}
-                onChange={handleSlugChange}
-                placeholder="myshop"
-                maxLength={30}
-                className="flex-1 px-4 py-3 outline-none"
+                value={formData.shop_name}
+                onChange={(e) => setFormData(prev => ({ ...prev, shop_name: e.target.value }))}
+                placeholder="ร้านเสื้อผ้าสมชาย"
+                maxLength={50}
+                className={`input-field ${errors.shop_name ? '!border-[#ef4444]' : ''}`}
               />
-              <div className="px-3">
-                {slugStatus === 'checking' && (
-                  <span className="text-secondary">...</span>
-                )}
-                {slugStatus === 'available' && (
-                  <span className="text-success">✓</span>
-                )}
-                {slugStatus === 'taken' && (
-                  <span className="text-error">✗</span>
-                )}
-              </div>
+              {errors.shop_name && (
+                <p className="mt-2 text-sm text-[#ef4444]">{errors.shop_name}</p>
+              )}
             </div>
-            {errors.shop_slug && (
-              <p className="mt-2 text-sm text-error">{errors.shop_slug}</p>
-            )}
-            {slugStatus === 'available' && !errors.shop_slug && (
-              <p className="mt-2 text-sm text-success">ใช้ได้</p>
-            )}
-            {slugStatus === 'taken' && !errors.shop_slug && (
-              <p className="mt-2 text-sm text-error">ถูกใช้แล้ว</p>
-            )}
-          </div>
 
-          {/* PromptPay ID */}
-          <div>
-            <label className="block text-sm font-medium mb-2">PromptPay ID (สำหรับรับเงิน)</label>
-            <input
-              type="text"
-              inputMode="numeric"
-              value={formData.promptpay_id}
-              onChange={(e) => setFormData(prev => ({ ...prev, promptpay_id: e.target.value.replace(/\D/g, '') }))}
-              placeholder="0812345678"
-              maxLength={13}
-              className={`w-full px-4 py-3 border ${errors.promptpay_id ? 'border-error' : 'border-border'} rounded-lg outline-none focus:ring-2 focus:ring-black focus:ring-offset-1`}
-            />
-            {errors.promptpay_id && (
-              <p className="mt-2 text-sm text-error">{errors.promptpay_id}</p>
-            )}
-          </div>
+            {/* Shop URL */}
+            <div className="glass-card !rounded-[20px] p-5">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="icon-box w-10 h-10 !rounded-[12px]">
+                  <svg className="w-5 h-5 text-[#7a6f63]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
+                  </svg>
+                </div>
+                <h2 className="font-bold text-[#1a1a1a]">ลิงก์ร้านค้า</h2>
+              </div>
+              <div className={`glass-card-inner !rounded-[14px] flex items-center overflow-hidden ${errors.shop_slug ? 'ring-2 ring-[#ef4444]' : ''}`}>
+                <span className="px-4 py-3.5 bg-white/30 text-[#7a6f63] border-r border-white/50 whitespace-nowrap">
+                  tapshop.me/
+                </span>
+                <input
+                  type="text"
+                  value={formData.shop_slug}
+                  onChange={handleSlugChange}
+                  placeholder="myshop"
+                  maxLength={30}
+                  className="flex-1 px-4 py-3.5 bg-transparent text-[#1a1a1a] placeholder:text-[#a69a8c] outline-none"
+                />
+                <div className="px-3">
+                  {slugStatus === 'checking' && (
+                    <div className="w-4 h-4 border-2 border-[#7a6f63] border-t-transparent rounded-full animate-spin" />
+                  )}
+                  {slugStatus === 'available' && (
+                    <svg className="w-5 h-5 text-[#22c55e]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
+                    </svg>
+                  )}
+                  {slugStatus === 'taken' && (
+                    <svg className="w-5 h-5 text-[#ef4444]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                  )}
+                </div>
+              </div>
+              {errors.shop_slug && (
+                <p className="mt-2 text-sm text-[#ef4444]">{errors.shop_slug}</p>
+              )}
+              {slugStatus === 'available' && !errors.shop_slug && (
+                <p className="mt-2 text-sm text-[#22c55e] font-medium">ใช้ได้!</p>
+              )}
+            </div>
 
-          {/* Pickup Address */}
-          <div>
-            <label className="block text-sm font-medium mb-2">ที่อยู่รับสินค้า</label>
-            <AddressAutocomplete
-              value={formData.pickup_address}
-              onChange={handleAddressChange}
-              error={errors.pickup_address}
-            />
-            {formData.pickup_address && formData.pickup_lat && (
-              <p className="mt-2 text-sm text-secondary">
-                📍 {formData.pickup_address}
-              </p>
-            )}
-          </div>
+            {/* PromptPay ID */}
+            <div className="glass-card !rounded-[20px] p-5">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="icon-box w-10 h-10 !rounded-[12px] !bg-gradient-to-br !from-[#3b82f6]/20 !to-[#2563eb]/10">
+                  <svg className="w-5 h-5 text-[#2563eb]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+                  </svg>
+                </div>
+                <h2 className="font-bold text-[#1a1a1a]">PromptPay ID (สำหรับรับเงิน)</h2>
+              </div>
+              <input
+                type="text"
+                inputMode="numeric"
+                value={formData.promptpay_id}
+                onChange={(e) => setFormData(prev => ({ ...prev, promptpay_id: e.target.value.replace(/\D/g, '') }))}
+                placeholder="0812345678"
+                maxLength={13}
+                className={`input-field ${errors.promptpay_id ? '!border-[#ef4444]' : ''}`}
+              />
+              {errors.promptpay_id && (
+                <p className="mt-2 text-sm text-[#ef4444]">{errors.promptpay_id}</p>
+              )}
+              <p className="mt-2 text-xs text-[#7a6f63]">เบอร์โทร (10 หลัก) หรือเลขบัตรประชาชน (13 หลัก)</p>
+            </div>
 
-          {/* Buttons */}
-          <div className="flex gap-4 pt-4">
-            <button
-              onClick={() => router.back()}
-              disabled={loading}
-              className="flex-1 py-4 border border-border rounded-lg font-semibold hover:bg-neutral-50 transition-colors disabled:opacity-50"
-            >
-              ย้อนกลับ
-            </button>
-            <button
-              onClick={handleSubmit}
-              disabled={loading || slugStatus === 'checking'}
-              className="flex-1 py-4 bg-black text-white font-semibold rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-neutral-800 transition-colors"
-            >
-              {loading ? 'กำลังบันทึก...' : 'ถัดไป'}
-            </button>
+            {/* Pickup Address */}
+            <div className="glass-card !rounded-[20px] p-5">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="icon-box w-10 h-10 !rounded-[12px] !bg-gradient-to-br !from-[#f59e0b]/20 !to-[#d97706]/10">
+                  <svg className="w-5 h-5 text-[#d97706]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                  </svg>
+                </div>
+                <h2 className="font-bold text-[#1a1a1a]">ที่อยู่รับสินค้า</h2>
+              </div>
+              <AddressAutocomplete
+                value={formData.pickup_address}
+                onChange={handleAddressChange}
+                error={errors.pickup_address}
+              />
+              {formData.pickup_address && formData.pickup_lat !== 0 && (
+                <div className="mt-3 glass-card-inner !rounded-[12px] p-3 flex items-start gap-2">
+                  <svg className="w-4 h-4 text-[#22c55e] flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                  </svg>
+                  <p className="text-sm text-[#1a1a1a]">{formData.pickup_address}</p>
+                </div>
+              )}
+            </div>
+
+            {/* Buttons */}
+            <div className="flex gap-4 pt-4">
+              <button
+                onClick={() => router.back()}
+                disabled={loading}
+                className="btn-secondary flex-1 !py-4"
+              >
+                ย้อนกลับ
+              </button>
+              <button
+                onClick={handleSubmit}
+                disabled={loading || slugStatus === 'checking'}
+                className="btn-primary flex-1 !py-4"
+              >
+                {loading ? (
+                  <span className="flex items-center justify-center gap-2">
+                    <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                    บันทึก...
+                  </span>
+                ) : (
+                  'ถัดไป'
+                )}
+              </button>
+            </div>
           </div>
         </div>
       </div>

@@ -26,31 +26,37 @@ export default function StatsCard({ totalEarnings, shopSlug }: StatsCardProps) {
   }
 
   return (
-    <div className="bg-neutral-50 rounded-2xl p-6">
+    <div className="glass-card !rounded-[24px] p-6 overflow-hidden relative">
+      {/* Decorative gradient */}
+      <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-[#22c55e]/10 to-transparent rounded-full -translate-y-1/2 translate-x-1/2" />
+
       {/* Earnings */}
-      <div className="mb-4">
-        <p className="text-4xl font-bold">฿{formatCurrency(totalEarnings)}</p>
-        <p className="text-secondary">รายได้ทั้งหมด</p>
+      <div className="mb-5 relative z-10">
+        <div className="flex items-baseline gap-1">
+          <span className="text-lg text-[#7a6f63]">฿</span>
+          <span className="text-4xl font-bold text-[#1a1a1a]">{formatCurrency(totalEarnings)}</span>
+        </div>
+        <p className="text-[#7a6f63] text-sm mt-1">รายได้ทั้งหมด</p>
       </div>
 
       {/* Shop Link */}
       {shopSlug && (
-        <div className="flex items-center gap-2 p-3 bg-white rounded-lg">
-          <span className="flex-1 text-sm font-medium truncate">{shopUrl}</span>
+        <div className="glass-card-inner !rounded-[14px] p-3 flex items-center gap-2">
+          <div className="icon-box w-9 h-9 !rounded-[10px] flex-shrink-0">
+            <svg className="w-4 h-4 text-[#7a6f63]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
+            </svg>
+          </div>
+          <span className="flex-1 text-sm font-medium text-[#1a1a1a] truncate">{shopUrl}</span>
           <button
             onClick={handleCopy}
-            className="p-2 hover:bg-neutral-100 rounded transition-colors shrink-0"
-            title="คัดลอกลิงก์"
+            className={`px-3 py-1.5 rounded-full text-sm font-medium transition-all ${
+              copied
+                ? 'bg-gradient-to-br from-[#22c55e] to-[#16a34a] text-white'
+                : 'glass-card-inner hover:bg-white/60 text-[#1a1a1a]'
+            }`}
           >
-            {copied ? (
-              <svg className="w-5 h-5 text-success" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-              </svg>
-            ) : (
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
-              </svg>
-            )}
+            {copied ? 'คัดลอกแล้ว!' : 'คัดลอก'}
           </button>
         </div>
       )}

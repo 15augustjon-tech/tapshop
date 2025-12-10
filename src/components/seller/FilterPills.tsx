@@ -16,15 +16,15 @@ const FILTERS = [
 
 export default function FilterPills({ activeFilter, onFilterChange }: FilterPillsProps) {
   return (
-    <div className="flex gap-2 overflow-x-auto py-4 -mx-[5%] px-[5%] scrollbar-hide">
+    <div className="flex gap-2 overflow-x-auto py-4 -mx-4 px-4 scrollbar-hide">
       {FILTERS.map((filter) => (
         <button
           key={filter.value}
           onClick={() => onFilterChange(filter.value)}
-          className={`px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-colors ${
+          className={`px-4 py-2.5 rounded-full text-sm font-medium whitespace-nowrap transition-all ${
             activeFilter === filter.value
-              ? 'bg-black text-white'
-              : 'border border-border text-black hover:bg-neutral-50'
+              ? 'bg-[#1a1a1a] text-white shadow-lg'
+              : 'glass-card-inner hover:bg-white/60 text-[#1a1a1a]'
           }`}
         >
           {filter.label}

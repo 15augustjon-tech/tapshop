@@ -1,7 +1,9 @@
 'use client'
 
+/* eslint-disable @next/next/no-html-link-for-pages */
+// global-error.tsx MUST use <a> tags because it renders its own html/body outside Next.js context
+
 export default function GlobalError({
-  error,
   reset,
 }: {
   error: Error & { digest?: string }

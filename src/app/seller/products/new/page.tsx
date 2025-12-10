@@ -34,7 +34,6 @@ export default function AddProductPage() {
         return
       }
 
-      // Success - redirect to dashboard
       router.push('/seller/dashboard')
     } catch (err) {
       console.error('Create product error:', err)
@@ -45,29 +44,41 @@ export default function AddProductPage() {
   }
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-gradient-main overflow-x-hidden">
+      {/* Ambient Lights */}
+      <div className="ambient-1" />
+      <div className="ambient-2" />
+
       {/* Header */}
-      <header className="sticky top-0 bg-white border-b border-border z-10">
-        <div className="flex items-center justify-between px-[5%] py-4">
-          <div className="flex items-center gap-4">
+      <header className="sticky top-0 z-20 px-4 pt-4">
+        <div className="glass-card !rounded-[16px]">
+          <div className="flex items-center px-4 h-[56px]">
             <Link
               href="/seller/dashboard"
-              className="p-2 -ml-2 hover:bg-neutral-100 rounded-full transition-colors"
+              className="w-10 h-10 flex items-center justify-center glass-card-inner !rounded-full hover:scale-110 transition-transform -ml-2"
             >
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-5 h-5 text-[#1a1a1a]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
               </svg>
             </Link>
-            <h1 className="text-xl font-bold">เพิ่มสินค้า</h1>
+            <h1 className="flex-1 text-center font-bold text-[#1a1a1a]">เพิ่มสินค้า</h1>
+            <div className="w-10" />
           </div>
         </div>
       </header>
 
       {/* Content */}
-      <div className="px-[5%] py-6 max-w-md mx-auto">
+      <div className="px-4 py-6 pb-24 max-w-md mx-auto relative z-10">
         {error && (
-          <div className="mb-6 p-4 bg-red-50 text-error rounded-lg">
-            {error}
+          <div className="mb-6 glass-card !rounded-[16px] p-4 border border-[#ef4444]/30 bg-gradient-to-r from-[#ef4444]/10 to-[#ef4444]/5 animate-pop">
+            <div className="flex items-center gap-3">
+              <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[#ef4444] to-[#dc2626] flex items-center justify-center flex-shrink-0">
+                <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </div>
+              <p className="font-medium text-[#dc2626]">{error}</p>
+            </div>
           </div>
         )}
 

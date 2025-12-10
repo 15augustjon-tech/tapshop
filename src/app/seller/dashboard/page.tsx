@@ -153,12 +153,13 @@ export default function SellerDashboard() {
     }
   }, [orderFilter, fetchOrders, loading])
 
-  // Pull to refresh
-  const handleRefresh = async () => {
+  // Pull to refresh (for future use)
+  const _handleRefresh = async () => {
     setRefreshing(true)
     await Promise.all([fetchStats(), fetchOrders(), fetchProducts()])
     setRefreshing(false)
   }
+  void _handleRefresh // suppress unused warning
 
   // Confirm all pending orders
   const handleConfirmAll = async () => {
@@ -220,20 +221,23 @@ export default function SellerDashboard() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-white flex items-center justify-center">
-        <div className="text-center">
-          <div className="w-8 h-8 border-2 border-black border-t-transparent rounded-full animate-spin mx-auto mb-4" />
-          <p className="text-secondary">กำลังโหลด...</p>
+      <div className="min-h-screen bg-gradient-main flex items-center justify-center">
+        <div className="icon-box w-16 h-16 !rounded-[20px] animate-pulse">
+          <div className="w-6 h-6 border-2 border-[#1a1a1a] border-t-transparent rounded-full animate-spin" />
         </div>
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen bg-white">
-      <div className="px-[5%] pb-24">
+    <div className="min-h-screen bg-gradient-main overflow-x-hidden">
+      {/* Ambient Lights */}
+      <div className="ambient-1" />
+      <div className="ambient-2" />
+
+      <div className="px-4 pb-24 relative z-10">
         {/* Header with Preview and QR Buttons */}
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between pt-4">
           <div className="flex-1">
             <DashboardHeader shopName={seller?.shop_name || ''} />
           </div>
@@ -243,10 +247,10 @@ export default function SellerDashboard() {
               href={`/${seller?.shop_slug}`}
               target="_blank"
               rel="noopener noreferrer"
-              className="p-2 hover:bg-neutral-100 rounded-full transition-colors"
+              className="w-10 h-10 flex items-center justify-center glass-card-inner !rounded-full hover:scale-110 transition-transform"
               title="ดูหน้าร้าน"
             >
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-5 h-5 text-[#1a1a1a]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
               </svg>
@@ -254,20 +258,20 @@ export default function SellerDashboard() {
             {/* QR Code Button */}
             <button
               onClick={() => setShowQRModal(true)}
-              className="p-2 hover:bg-neutral-100 rounded-full transition-colors"
+              className="w-10 h-10 flex items-center justify-center glass-card-inner !rounded-full hover:scale-110 transition-transform"
               title="แชร์ร้านของคุณ"
             >
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-5 h-5 text-[#1a1a1a]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z" />
               </svg>
             </button>
             {/* Settings Button */}
             <Link
               href="/seller/settings"
-              className="p-2 hover:bg-neutral-100 rounded-full transition-colors"
+              className="w-10 h-10 flex items-center justify-center glass-card-inner !rounded-full hover:scale-110 transition-transform"
               title="ตั้งค่า"
             >
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-5 h-5 text-[#1a1a1a]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
               </svg>
@@ -276,7 +280,7 @@ export default function SellerDashboard() {
         </div>
 
         {/* Stats */}
-        <div className="mb-6">
+        <div className="mb-6 mt-4">
           <StatsCard
             totalEarnings={stats?.total_earnings || 0}
             shopSlug={seller?.shop_slug || ''}
@@ -297,7 +301,7 @@ export default function SellerDashboard() {
         {/* Pull to refresh indicator */}
         {refreshing && (
           <div className="text-center py-2">
-            <div className="w-5 h-5 border-2 border-black border-t-transparent rounded-full animate-spin mx-auto" />
+            <div className="w-5 h-5 border-2 border-[#1a1a1a] border-t-transparent rounded-full animate-spin mx-auto" />
           </div>
         )}
 
@@ -364,35 +368,35 @@ export default function SellerDashboard() {
       {/* Floating Action Button */}
       <Link
         href="/seller/products/new"
-        className="fixed bottom-6 right-6 w-14 h-14 bg-black text-white rounded-full shadow-lg flex items-center justify-center hover:bg-neutral-800 transition-colors"
+        className="fixed bottom-6 right-6 w-14 h-14 bg-[#1a1a1a] text-white rounded-full shadow-xl flex items-center justify-center hover:scale-110 transition-transform z-20"
       >
         <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M12 4v16m8-8H4" />
         </svg>
       </Link>
 
       {/* QR Code Modal */}
       {showQRModal && (
         <div
-          className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4"
+          className="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-center justify-center p-4"
           onClick={() => setShowQRModal(false)}
         >
           <div
-            className="bg-white rounded-2xl p-6 w-full max-w-sm relative"
+            className="glass-card !rounded-[24px] p-6 w-full max-w-sm relative animate-pop"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Close Button */}
             <button
               onClick={() => setShowQRModal(false)}
-              className="absolute top-4 right-4 p-1 hover:bg-neutral-100 rounded-full transition-colors"
+              className="absolute top-4 right-4 w-10 h-10 flex items-center justify-center glass-card-inner !rounded-full hover:scale-110 transition-transform"
             >
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-5 h-5 text-[#1a1a1a]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
               </svg>
             </button>
 
             {/* Title */}
-            <h2 className="text-xl font-bold text-center mb-6">แชร์ร้านของคุณ</h2>
+            <h2 className="text-xl font-bold text-[#1a1a1a] text-center mb-6">แชร์ร้านของคุณ</h2>
 
             {/* QR Code Component */}
             {seller?.shop_slug && (
@@ -406,7 +410,7 @@ export default function SellerDashboard() {
             {/* Close Button at Bottom */}
             <button
               onClick={() => setShowQRModal(false)}
-              className="w-full mt-6 py-3 border border-border rounded-lg font-medium hover:bg-neutral-50 transition-colors"
+              className="btn-secondary w-full mt-6"
             >
               ปิด
             </button>

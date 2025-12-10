@@ -22,16 +22,19 @@ export default function OTPInput({
 
   // Sync with external value
   useEffect(() => {
-    if (value) {
-      const digits = value.split('').slice(0, length)
-      const newOtp = [...Array(length).fill('')]
-      digits.forEach((digit, i) => {
-        newOtp[i] = digit
-      })
-      setOtp(newOtp)
-    } else {
-      setOtp(Array(length).fill(''))
+    const syncValue = () => {
+      if (value) {
+        const digits = value.split('').slice(0, length)
+        const newOtp = [...Array(length).fill('')]
+        digits.forEach((digit, i) => {
+          newOtp[i] = digit
+        })
+        setOtp(newOtp)
+      } else {
+        setOtp(Array(length).fill(''))
+      }
     }
+    syncValue()
   }, [value, length])
 
   // Focus first input on mount
@@ -104,14 +107,14 @@ export default function OTPInput({
               onKeyDown={(e) => handleKeyDown(index, e)}
               onPaste={handlePaste}
               disabled={disabled}
-              className={`w-12 h-14 sm:w-14 sm:h-16 text-center text-2xl font-semibold border ${
-                error ? 'border-error' : 'border-border'
-              } rounded-lg outline-none focus:ring-2 focus:ring-black focus:ring-offset-1 disabled:bg-neutral-100 disabled:text-secondary transition-all`}
+              className={`w-12 h-14 sm:w-14 sm:h-16 text-center text-2xl font-semibold text-[#1a1a1a] border ${
+                error ? 'border-[#ef4444]' : 'border-[#e8e2da]'
+              } rounded-[12px] bg-white/50 outline-none focus:ring-2 focus:ring-[#1a1a1a] focus:ring-offset-1 disabled:bg-white/30 disabled:text-[#7a6f63] transition-all`}
             />
           ))}
       </div>
       {error && (
-        <p className="mt-3 text-sm text-error text-center">{error}</p>
+        <p className="mt-3 text-sm text-[#ef4444] text-center">{error}</p>
       )}
     </div>
   )
