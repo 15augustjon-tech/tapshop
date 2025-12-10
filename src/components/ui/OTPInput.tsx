@@ -92,7 +92,7 @@ export default function OTPInput({
 
   return (
     <div className="w-full">
-      <div className="flex justify-center gap-2 sm:gap-3">
+      <div className="flex justify-center gap-1.5 sm:gap-2">
         {Array(length)
           .fill(0)
           .map((_, index) => (
@@ -107,9 +107,9 @@ export default function OTPInput({
               onKeyDown={(e) => handleKeyDown(index, e)}
               onPaste={handlePaste}
               disabled={disabled}
-              className={`w-12 h-14 sm:w-14 sm:h-16 text-center text-2xl font-semibold text-[#1a1a1a] border ${
-                error ? 'border-[#ef4444]' : 'border-[#e8e2da]'
-              } rounded-[12px] bg-white/50 outline-none focus:ring-2 focus:ring-[#1a1a1a] focus:ring-offset-1 disabled:bg-white/30 disabled:text-[#7a6f63] transition-all`}
+              className={`w-10 h-12 sm:w-12 sm:h-14 text-center text-xl sm:text-2xl font-semibold text-[#1a1a1a] border-2 ${
+                error ? 'border-[#ef4444]' : 'border-[#d4cec4]'
+              } rounded-xl bg-white/70 outline-none focus:border-[#1a1a1a] focus:ring-0 disabled:bg-white/30 disabled:text-[#7a6f63] transition-all`}
             />
           ))}
       </div>

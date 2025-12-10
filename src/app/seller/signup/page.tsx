@@ -90,7 +90,12 @@ export default function SellerSignupPage() {
     setLoading(true)
 
     try {
+      // Always ensure reCAPTCHA is ready
       if (!recaptchaVerifierRef.current) {
+        // Reset container first to be safe
+        if (recaptchaContainerRef.current) {
+          recaptchaContainerRef.current.innerHTML = ''
+        }
         initRecaptcha()
       }
 
@@ -185,10 +190,23 @@ export default function SellerSignupPage() {
     setOtp('')
     setError('')
 
+    // Clear existing reCAPTCHA completely
     if (recaptchaVerifierRef.current) {
-      recaptchaVerifierRef.current.clear()
+      try {
+        recaptchaVerifierRef.current.clear()
+      } catch {
+        // Ignore clear errors
+      }
       recaptchaVerifierRef.current = null
     }
+
+    // Reset the container's innerHTML to allow fresh reCAPTCHA
+    if (recaptchaContainerRef.current) {
+      recaptchaContainerRef.current.innerHTML = ''
+    }
+
+    // Force re-init reCAPTCHA
+    initRecaptcha()
 
     await handleSendOTP()
   }
@@ -234,15 +252,16 @@ export default function SellerSignupPage() {
       <div className="px-4 pt-12 pb-8 relative z-10">
         <div className="max-w-md mx-auto">
           {/* Logo */}
-          <Link href="/" className="glass-card inline-flex items-center gap-2 px-5 py-2.5 !rounded-full mb-6">
-            <div className="w-6 h-6 bg-gradient-to-br from-[#1a1a1a] to-[#333] rounded-lg" />
-            <span className="text-lg font-bold text-[#1a1a1a]">TapShop</span>
+          <Link href="/" className="inline-flex mb-4">
+            <span className="text-xl font-bold text-[#1a1a1a]">
+              Tap<span className="text-[#22c55e]">Shop</span>
+            </span>
           </Link>
 
           <ProgressBar currentStep={1} totalSteps={3} />
 
-          {/* reCAPTCHA container (invisible) */}
-          <div ref={recaptchaContainerRef} id="recaptcha-container" />
+          {/* reCAPTCHA container - positioned off-screen but not display:none */}
+          <div ref={recaptchaContainerRef} id="recaptcha-container" style={{ position: 'absolute', left: '-9999px' }} />
 
           {step === 'phone' ? (
             <div className="glass-card !rounded-[24px] p-6">
