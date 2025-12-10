@@ -25,6 +25,7 @@ export default function CheckoutConfirmPage({ params }: Props) {
 
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState('')
+  const [paymentMethod, setPaymentMethod] = useState<'promptpay' | 'cod'>('promptpay')
 
   // Redirect if no address or cart is empty
   useEffect(() => {
@@ -58,7 +59,8 @@ export default function CheckoutConfirmPage({ params }: Props) {
           buyerLat: address.lat,
           buyerLng: address.lng,
           buyerNotes: address.notes,
-          saveAddress
+          saveAddress,
+          paymentMethod
         })
       })
 
@@ -73,8 +75,14 @@ export default function CheckoutConfirmPage({ params }: Props) {
       clearCart()
       clearCheckout()
 
-      // Redirect to payment page (PromptPay QR)
-      router.push(`/${shopname}/order/${data.order.id}/pay`)
+      // Redirect based on payment method
+      if (paymentMethod === 'cod') {
+        // COD: Go directly to order tracking
+        router.push(`/${shopname}/order/${data.order.id}`)
+      } else {
+        // PromptPay: Go to payment page for QR
+        router.push(`/${shopname}/order/${data.order.id}/pay`)
+      }
     } catch (err) {
       console.error('Order error:', err)
       setError('เกิดข้อผิดพลาด กรุณาลองใหม่')
@@ -202,7 +210,7 @@ export default function CheckoutConfirmPage({ params }: Props) {
           </div>
         </div>
 
-        {/* Payment Breakdown */}
+        {/* Payment Method Selection */}
         <div className="glass-card !rounded-[24px] p-5 animate-fade-in" style={{ animationDelay: '50ms' }}>
           <div className="flex items-center gap-3 mb-4">
             <div className="icon-box w-10 h-10 !rounded-[12px]">
@@ -210,49 +218,103 @@ export default function CheckoutConfirmPage({ params }: Props) {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" />
               </svg>
             </div>
-            <h2 className="font-bold text-[#1a1a1a]">สรุปยอดชำระ</h2>
+            <h2 className="font-bold text-[#1a1a1a]">เลือกวิธีชำระเงิน</h2>
           </div>
 
-          {/* PromptPay Section */}
-          <div className="glass-card-inner !rounded-[16px] p-4 mb-3 border border-[#1E4A99]/20 bg-[rgba(30,74,153,0.05)]">
-            <div className="flex items-center gap-2 mb-3">
-              <div className="w-8 h-8 rounded-[8px] bg-[#1E4A99] flex items-center justify-center">
-                <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
-                </svg>
+          <div className="space-y-3">
+            {/* PromptPay Option */}
+            <button
+              type="button"
+              onClick={() => setPaymentMethod('promptpay')}
+              className={`w-full text-left p-4 rounded-[16px] transition-all ${
+                paymentMethod === 'promptpay'
+                  ? 'bg-[#1a1a1a] text-white'
+                  : 'glass-card-inner hover:bg-white/60'
+              }`}
+            >
+              <div className="flex items-center gap-3">
+                <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center flex-shrink-0 ${
+                  paymentMethod === 'promptpay' ? 'border-white' : 'border-[#a69a8c]'
+                }`}>
+                  {paymentMethod === 'promptpay' && (
+                    <div className="w-2.5 h-2.5 bg-white rounded-full" />
+                  )}
+                </div>
+                <div className={`w-10 h-10 rounded-[10px] flex items-center justify-center flex-shrink-0 ${
+                  paymentMethod === 'promptpay' ? 'bg-white/20' : 'bg-[#1E4A99]'
+                }`}>
+                  <svg className={`w-5 h-5 ${paymentMethod === 'promptpay' ? 'text-white' : 'text-white'}`} fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+                  </svg>
+                </div>
+                <div className="flex-1">
+                  <p className="font-semibold">PromptPay</p>
+                  <p className={`text-sm ${paymentMethod === 'promptpay' ? 'text-white/70' : 'text-[#7a6f63]'}`}>
+                    สแกน QR จ่ายค่าสินค้า • ค่าส่งจ่ายเงินสด
+                  </p>
+                </div>
               </div>
-              <span className="font-semibold text-[#1E4A99]">PromptPay</span>
-            </div>
-            <div className="flex justify-between items-center mb-2">
+            </button>
+
+            {/* COD Option */}
+            <button
+              type="button"
+              onClick={() => setPaymentMethod('cod')}
+              className={`w-full text-left p-4 rounded-[16px] transition-all ${
+                paymentMethod === 'cod'
+                  ? 'bg-[#1a1a1a] text-white'
+                  : 'glass-card-inner hover:bg-white/60'
+              }`}
+            >
+              <div className="flex items-center gap-3">
+                <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center flex-shrink-0 ${
+                  paymentMethod === 'cod' ? 'border-white' : 'border-[#a69a8c]'
+                }`}>
+                  {paymentMethod === 'cod' && (
+                    <div className="w-2.5 h-2.5 bg-white rounded-full" />
+                  )}
+                </div>
+                <div className={`w-10 h-10 rounded-[10px] flex items-center justify-center flex-shrink-0 ${
+                  paymentMethod === 'cod' ? 'bg-white/20' : 'bg-gradient-to-br from-[#22c55e] to-[#16a34a]'
+                }`}>
+                  <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" />
+                  </svg>
+                </div>
+                <div className="flex-1">
+                  <p className="font-semibold">เก็บเงินปลายทาง (COD)</p>
+                  <p className={`text-sm ${paymentMethod === 'cod' ? 'text-white/70' : 'text-[#7a6f63]'}`}>
+                    จ่ายเงินสดทั้งหมดให้ไรเดอร์
+                  </p>
+                </div>
+              </div>
+            </button>
+          </div>
+
+          {/* Payment Summary */}
+          <div className="mt-4 pt-4 border-t border-white/50 space-y-2">
+            <div className="flex justify-between text-sm">
               <span className="text-[#7a6f63]">ค่าสินค้า</span>
-              <span className="font-bold text-lg text-[#1a1a1a]">฿{productTotal.toLocaleString()}</span>
+              <span className="text-[#1a1a1a]">฿{productTotal.toLocaleString()}</span>
             </div>
-            <p className="text-xs text-[#1E4A99]/70">ชำระผ่าน QR Code หลังยืนยัน</p>
-          </div>
-
-          {/* Cash Section */}
-          <div className="glass-card-inner !rounded-[16px] p-4 border border-[#22c55e]/20 bg-[rgba(34,197,94,0.05)]">
-            <div className="flex items-center gap-2 mb-3">
-              <div className="w-8 h-8 rounded-[8px] bg-gradient-to-br from-[#22c55e] to-[#16a34a] flex items-center justify-center">
-                <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" />
-                </svg>
-              </div>
-              <span className="font-semibold text-[#22c55e]">เงินสด</span>
-            </div>
-            <div className="flex justify-between items-center mb-2">
+            <div className="flex justify-between text-sm">
               <span className="text-[#7a6f63]">ค่าส่ง</span>
-              <span className="font-bold text-lg text-[#1a1a1a]">฿{deliveryFee}</span>
+              <span className="text-[#1a1a1a]">฿{deliveryFee}</span>
             </div>
-            <p className="text-xs text-[#22c55e]/70">จ่ายให้ไรเดอร์เมื่อรับของ</p>
-          </div>
-
-          {/* Total */}
-          <div className="mt-4 pt-4 border-t border-white/50">
-            <div className="flex justify-between items-center">
+            <div className="pt-2 border-t border-white/30 flex justify-between items-center">
               <span className="font-bold text-[#1a1a1a]">รวมทั้งหมด</span>
               <span className="text-2xl font-bold text-[#1a1a1a]">฿{(productTotal + deliveryFee).toLocaleString()}</span>
             </div>
+            {paymentMethod === 'promptpay' && (
+              <p className="text-xs text-[#7a6f63] text-center pt-2">
+                ค่าสินค้า ฿{productTotal.toLocaleString()} ชำระผ่าน QR • ค่าส่ง ฿{deliveryFee} จ่ายเงินสด
+              </p>
+            )}
+            {paymentMethod === 'cod' && (
+              <p className="text-xs text-[#22c55e] text-center pt-2">
+                จ่ายเงินสด ฿{(productTotal + deliveryFee).toLocaleString()} ให้ไรเดอร์เมื่อรับของ
+              </p>
+            )}
           </div>
         </div>
 
@@ -321,7 +383,7 @@ export default function CheckoutConfirmPage({ params }: Props) {
               </span>
             ) : (
               <>
-                ยืนยันและไปชำระเงิน
+                {paymentMethod === 'cod' ? 'ยืนยันคำสั่งซื้อ' : 'ยืนยันและไปชำระเงิน'}
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M17 8l4 4m0 0l-4 4m4-4H3" />
                 </svg>

@@ -231,8 +231,14 @@ export default function SellerSignupPage() {
       <div className="ambient-1" />
       <div className="ambient-2" />
 
-      <div className="px-4 py-8 relative z-10">
+      <div className="px-4 pt-12 pb-8 relative z-10">
         <div className="max-w-md mx-auto">
+          {/* Logo */}
+          <Link href="/" className="glass-card inline-flex items-center gap-2 px-5 py-2.5 !rounded-full mb-6">
+            <div className="w-6 h-6 bg-gradient-to-br from-[#1a1a1a] to-[#333] rounded-lg" />
+            <span className="text-lg font-bold text-[#1a1a1a]">TapShop</span>
+          </Link>
+
           <ProgressBar currentStep={1} totalSteps={3} />
 
           {/* reCAPTCHA container (invisible) */}
