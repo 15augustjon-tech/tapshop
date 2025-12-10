@@ -91,8 +91,8 @@ export default function OTPInput({
   }
 
   return (
-    <div className="w-full overflow-hidden">
-      <div className="flex justify-center gap-2">
+    <div className="w-full">
+      <div className="flex justify-center gap-[6px]">
         {Array(length)
           .fill(0)
           .map((_, index) => (
@@ -109,10 +109,10 @@ export default function OTPInput({
               onPaste={handlePaste}
               disabled={disabled}
               autoComplete="one-time-code"
-              style={{ fontSize: '16px' }}
-              className={`w-11 h-12 text-center font-bold text-[#1a1a1a] border-2 ${
+              className={`w-[42px] h-[48px] text-center text-lg font-bold text-[#1a1a1a] border-2 ${
                 error ? 'border-[#ef4444]' : otp[index] ? 'border-[#1a1a1a]' : 'border-[#d4cec4]'
-              } rounded-xl bg-white/80 outline-none focus:border-[#1a1a1a] disabled:bg-white/30 disabled:text-[#7a6f63]`}
+              } rounded-xl bg-white/80 outline-none focus:border-[#1a1a1a] focus:ring-2 focus:ring-[#1a1a1a]/20 disabled:bg-white/30 disabled:text-[#7a6f63] transition-all`}
+              style={{ fontSize: '18px', WebkitAppearance: 'none' }}
             />
           ))}
       </div>

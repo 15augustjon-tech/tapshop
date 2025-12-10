@@ -29,7 +29,7 @@ export default function AboutPage() {
       </nav>
 
       {/* Main Content */}
-      <div className="relative z-10 max-w-[480px] mx-auto px-5 pt-24 pb-12">
+      <div className="relative z-10 max-w-[420px] mx-auto px-4 pt-20 pb-10">
         <h1 className="text-3xl font-extrabold text-[#1a1a1a] mb-2">ข้อมูลเพิ่มเติม</h1>
         <p className="text-[#7a6f63] mb-8">ทุกอย่างที่คุณต้องรู้เกี่ยวกับ TapShop</p>
 

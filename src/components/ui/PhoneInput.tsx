@@ -55,7 +55,8 @@ export default function PhoneInput({ value, onChange, disabled, error }: PhoneIn
           onBlur={handleBlur}
           disabled={disabled}
           placeholder="081-234-5678"
-          className="flex-1 px-4 py-3.5 text-lg text-[#1a1a1a] placeholder:text-[#a69a8c] bg-transparent outline-none disabled:bg-white/30 disabled:text-[#7a6f63]"
+          className="flex-1 px-4 py-3.5 text-[#1a1a1a] placeholder:text-[#a69a8c] bg-transparent outline-none disabled:bg-white/30 disabled:text-[#7a6f63]"
+          style={{ fontSize: '16px', WebkitAppearance: 'none' }}
           autoComplete="tel"
         />
       </div>

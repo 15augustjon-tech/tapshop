@@ -104,7 +104,7 @@ export default function LandingPage() {
       )}
 
       {/* Main Content */}
-      <div className="relative z-10 max-w-[480px] mx-auto px-5 pt-24 pb-12">
+      <div className="relative z-10 max-w-[420px] mx-auto px-4 pt-20 pb-10">
         {/* Hero Headline */}
         <h1 className="text-center text-[clamp(32px,8vw,44px)] font-extrabold text-[#1a1a1a] leading-[1.1] tracking-tight mb-4">
           ขายออนไลน์<br />
@@ -121,9 +121,9 @@ export default function LandingPage() {
         </p>
 
         {/* Phone Mockups */}
-        <div className="flex justify-center gap-3 mb-10 perspective-[1500px]">
+        <div className="flex justify-center gap-2 sm:gap-3 mb-8 perspective-[1500px]">
           {/* Left Phone - Buyer View */}
-          <div className="w-[150px] h-[300px] bg-gradient-to-b from-[#1d1d1f] to-[#0a0a0a] rounded-[28px] p-2 shadow-2xl transform rotate-y-[8deg] hover:-translate-y-2 transition-transform">
+          <div className="w-[130px] h-[260px] sm:w-[145px] sm:h-[290px] bg-gradient-to-b from-[#1d1d1f] to-[#0a0a0a] rounded-[24px] sm:rounded-[28px] p-[6px] sm:p-2 shadow-2xl transform rotate-y-[8deg] hover:-translate-y-2 transition-transform">
             <div className="w-full h-full bg-gradient-to-b from-[#f8f4ef] to-[#f0e9df] rounded-[22px] overflow-hidden relative">
               {/* Status Bar */}
               <div className="h-5 flex items-center justify-between px-3 pt-1">
@@ -183,7 +183,7 @@ export default function LandingPage() {
           </div>
 
           {/* Right Phone - Seller Dashboard */}
-          <div className="w-[150px] h-[300px] bg-gradient-to-b from-[#1d1d1f] to-[#0a0a0a] rounded-[28px] p-2 shadow-2xl transform rotate-y-[-8deg] hover:-translate-y-2 transition-transform">
+          <div className="w-[130px] h-[260px] sm:w-[145px] sm:h-[290px] bg-gradient-to-b from-[#1d1d1f] to-[#0a0a0a] rounded-[24px] sm:rounded-[28px] p-[6px] sm:p-2 shadow-2xl transform rotate-y-[-8deg] hover:-translate-y-2 transition-transform">
             <div className="w-full h-full bg-gradient-to-b from-[#f8f4ef] to-[#f0e9df] rounded-[22px] overflow-hidden relative">
               {/* Status Bar */}
               <div className="h-5 flex items-center justify-between px-3 pt-1">
@@ -269,7 +269,7 @@ export default function LandingPage() {
         </div>
 
         {/* Phone Labels */}
-        <div className="flex justify-center gap-16 mb-10">
+        <div className="flex justify-center gap-10 sm:gap-16 mb-8">
           <div className="text-center">
             <p className="text-sm font-bold text-[#1a1a1a]">ลูกค้าเห็น</p>
             <p className="text-xs text-[#7a6f63]">หน้าร้านของคุณ</p>
