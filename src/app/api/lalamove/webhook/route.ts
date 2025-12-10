@@ -24,11 +24,11 @@ interface LalamoveWebhookPayload {
 
 // Verify Lalamove webhook signature
 function verifyLalamoveSignature(body: string, signature: string | null): boolean {
-  // Skip verification in development if no secret configured
+  // SECURITY: Never skip verification - require API secret
   const secret = process.env.LALAMOVE_API_SECRET
   if (!secret) {
-    console.warn('[Lalamove Webhook] No API secret configured, skipping signature verification')
-    return process.env.NODE_ENV === 'development'
+    console.error('[Lalamove Webhook] SECURITY: No API secret configured - rejecting request')
+    return false
   }
 
   if (!signature) {

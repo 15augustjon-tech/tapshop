@@ -68,7 +68,7 @@ export default function AddProductPage() {
       </header>
 
       {/* Content */}
-      <div className="px-4 py-6 pb-24 max-w-md mx-auto relative z-10">
+      <div className="px-4 pt-4 pb-24 max-w-md mx-auto relative z-10">
         {error && (
           <div className="mb-6 glass-card !rounded-[16px] p-4 border border-[#ef4444]/30 bg-gradient-to-r from-[#ef4444]/10 to-[#ef4444]/5 animate-pop">
             <div className="flex items-center gap-3">

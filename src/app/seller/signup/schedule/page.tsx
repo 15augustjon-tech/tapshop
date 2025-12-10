@@ -75,7 +75,7 @@ export default function SchedulePage() {
       <div className="ambient-1" />
       <div className="ambient-2" />
 
-      <div className="px-4 pt-12 pb-8 relative z-10">
+      <div className="px-4 pt-4 pb-8 relative z-10">
         <div className="max-w-md mx-auto">
           <ProgressBar currentStep={3} totalSteps={3} />
 

@@ -88,13 +88,20 @@ html, body {
   position: relative;
 }
 
+html {
+  background-color: #e8dfd3;
+}
+
 body {
   background: var(--bg-gradient);
+  background-color: #f0e9df;
   background-attachment: fixed;
+  background-size: cover;
   color: var(--foreground);
   font-family: var(--font-sans);
   min-height: 100vh;
   min-height: 100dvh;
+  min-height: -webkit-fill-available;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }

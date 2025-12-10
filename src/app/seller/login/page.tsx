@@ -249,7 +249,7 @@ export default function SellerLoginPage() {
       <div ref={recaptchaContainerRef} id="recaptcha-container-login" style={{ position: 'fixed', left: '-9999px', top: '-9999px', visibility: 'hidden' }} />
 
       <div className="px-4 pb-8 safe-area-top">
-        <div className="max-w-sm mx-auto pt-6">
+        <div className="max-w-sm mx-auto pt-4">
           {/* Logo */}
           <Link href="/" className="inline-flex mb-6">
             <span className="text-xl font-bold text-[#1a1a1a]">

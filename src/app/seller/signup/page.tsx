@@ -121,8 +121,14 @@ export default function SellerSignupPage() {
         setError('ส่ง OTP มากเกินไป กรุณารอสักครู่')
       } else if (firebaseError.code === 'auth/quota-exceeded') {
         setError('ระบบ SMS เกินโควต้า กรุณาลองใหม่ภายหลัง')
+      } else if (firebaseError.code === 'auth/operation-not-allowed') {
+        setError('Phone Auth ยังไม่ได้เปิดใช้งานใน Firebase')
+      } else if (firebaseError.code === 'auth/captcha-check-failed') {
+        setError('reCAPTCHA ล้มเหลว กรุณาลองใหม่')
+      } else if (firebaseError.code === 'auth/missing-phone-number') {
+        setError('กรุณากรอกเบอร์โทร')
       } else {
-        setError('เกิดข้อผิดพลาด กรุณาลองใหม่')
+        setError(`เกิดข้อผิดพลาด: ${firebaseError.code || firebaseError.message || 'Unknown'}`)
       }
 
       if (recaptchaVerifierRef.current) {
@@ -249,7 +255,7 @@ export default function SellerSignupPage() {
       <div ref={recaptchaContainerRef} id="recaptcha-container" style={{ position: 'fixed', left: '-9999px', top: '-9999px', visibility: 'hidden' }} />
 
       <div className="px-4 pb-8 safe-area-top">
-        <div className="max-w-sm mx-auto pt-6">
+        <div className="max-w-sm mx-auto pt-4">
           {/* Logo */}
           <Link href="/" className="inline-flex mb-6">
             <span className="text-xl font-bold text-[#1a1a1a]">

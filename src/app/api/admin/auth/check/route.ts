@@ -21,9 +21,9 @@ export async function GET() {
       .single()
 
     if (error || !settings) {
-      // No database record, fall back to cookie-only check for backward compatibility
-      // This is less secure but allows system to work before table is created
-      return NextResponse.json({ authenticated: true })
+      // SECURITY: Always return false if we can't verify against database
+      console.error('Admin auth check failed:', error?.message || 'No settings found')
+      return NextResponse.json({ authenticated: false }, { status: 401 })
     }
 
     // Verify token matches
@@ -37,8 +37,9 @@ export async function GET() {
     }
 
     return NextResponse.json({ authenticated: true })
-  } catch {
-    // Database error, fall back to cookie-only
-    return NextResponse.json({ authenticated: true })
+  } catch (error) {
+    // SECURITY: Always return false on any error
+    console.error('Admin auth check error:', error)
+    return NextResponse.json({ authenticated: false }, { status: 500 })
   }
 }

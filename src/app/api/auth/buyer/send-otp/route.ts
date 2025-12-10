@@ -48,17 +48,13 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // TODO: Send OTP via SMS (Twilio, etc.)
-    // For MVP: Log to console in development only
-    if (process.env.NODE_ENV === 'development') {
-      console.log(`[BUYER OTP] Phone: ${phone}, Code: ${otp}`)
-    }
+    // TODO: Implement SMS sending (Twilio, etc.)
+    // For now, OTP is stored in database but not sent
+    // In production, integrate with SMS provider
 
     return NextResponse.json({
       success: true,
-      message: 'ส่งรหัส OTP แล้ว',
-      // Remove in production:
-      debug_otp: process.env.NODE_ENV === 'development' ? otp : undefined
+      message: 'ส่งรหัส OTP แล้ว'
     })
   } catch (error) {
     console.error('Send buyer OTP error:', error)

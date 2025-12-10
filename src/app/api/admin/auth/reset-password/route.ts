@@ -13,9 +13,22 @@ export async function POST(request: NextRequest) {
       )
     }
 
+    // Password complexity validation
     if (password.length < 8) {
       return NextResponse.json(
         { success: false, message: 'รหัสผ่านต้องมีอย่างน้อย 8 ตัวอักษร' },
+        { status: 400 }
+      )
+    }
+
+    // Check for at least one uppercase, one lowercase, and one number
+    const hasUppercase = /[A-Z]/.test(password)
+    const hasLowercase = /[a-z]/.test(password)
+    const hasNumber = /[0-9]/.test(password)
+
+    if (!hasUppercase || !hasLowercase || !hasNumber) {
+      return NextResponse.json(
+        { success: false, message: 'รหัสผ่านต้องมีตัวพิมพ์ใหญ่ ตัวพิมพ์เล็ก และตัวเลข' },
         { status: 400 }
       )
     }
