@@ -244,22 +244,18 @@ export default function SellerLoginPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-main overflow-x-hidden">
-      {/* Ambient Lights */}
-      <div className="ambient-1" />
-      <div className="ambient-2" />
+    <div className="min-h-screen bg-gradient-main overflow-hidden">
+      {/* Hidden reCAPTCHA container */}
+      <div ref={recaptchaContainerRef} id="recaptcha-container-login" style={{ position: 'fixed', left: '-9999px', top: '-9999px', visibility: 'hidden' }} />
 
-      <div className="px-4 pt-12 pb-8 relative z-10">
-        <div className="max-w-md mx-auto">
+      <div className="px-4 pb-8 safe-area-top">
+        <div className="max-w-sm mx-auto pt-6">
           {/* Logo */}
-          <Link href="/" className="inline-flex mb-4">
+          <Link href="/" className="inline-flex mb-6">
             <span className="text-xl font-bold text-[#1a1a1a]">
               Tap<span className="text-[#22c55e]">Shop</span>
             </span>
           </Link>
-
-          {/* reCAPTCHA container - positioned off-screen but not display:none */}
-          <div ref={recaptchaContainerRef} id="recaptcha-container-login" style={{ position: 'absolute', left: '-9999px' }} />
 
           {step === 'phone' ? (
             <div className="glass-card !rounded-[24px] p-6">
@@ -294,6 +290,10 @@ export default function SellerLoginPage() {
                   <Link href="/seller/signup" className="text-[#1a1a1a] font-semibold hover:underline">
                     สร้างร้านเลย
                   </Link>
+                </p>
+
+                <p className="text-center text-xs text-[#a69a8c]">
+                  Protected by reCAPTCHA
                 </p>
               </div>
             </div>
@@ -346,7 +346,7 @@ export default function SellerLoginPage() {
                       countdown > 0 ? 'opacity-50' : ''
                     }`}
                   >
-                    {countdown > 0 ? `ส่งรหัสใหม่ (${countdown}s)` : 'ส่งรหัสใหม่'}
+                    {countdown > 0 ? `ส่งใหม่ (${countdown}s)` : 'ส่งรหัสใหม่'}
                   </button>
 
                   <button
@@ -357,6 +357,10 @@ export default function SellerLoginPage() {
                     เปลี่ยนเบอร์
                   </button>
                 </div>
+
+                <p className="text-center text-xs text-[#a69a8c]">
+                  Protected by reCAPTCHA
+                </p>
               </div>
             </div>
           )}

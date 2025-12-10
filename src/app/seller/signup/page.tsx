@@ -244,15 +244,14 @@ export default function SellerSignupPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-main overflow-x-hidden">
-      {/* Ambient Lights */}
-      <div className="ambient-1" />
-      <div className="ambient-2" />
+    <div className="min-h-screen bg-gradient-main overflow-hidden">
+      {/* Hidden reCAPTCHA container */}
+      <div ref={recaptchaContainerRef} id="recaptcha-container" style={{ position: 'fixed', left: '-9999px', top: '-9999px', visibility: 'hidden' }} />
 
-      <div className="px-4 pt-12 pb-8 relative z-10">
-        <div className="max-w-md mx-auto">
+      <div className="px-4 pb-8 safe-area-top">
+        <div className="max-w-sm mx-auto pt-6">
           {/* Logo */}
-          <Link href="/" className="inline-flex mb-4">
+          <Link href="/" className="inline-flex mb-6">
             <span className="text-xl font-bold text-[#1a1a1a]">
               Tap<span className="text-[#22c55e]">Shop</span>
             </span>
@@ -260,11 +259,8 @@ export default function SellerSignupPage() {
 
           <ProgressBar currentStep={1} totalSteps={3} />
 
-          {/* reCAPTCHA container - positioned off-screen but not display:none */}
-          <div ref={recaptchaContainerRef} id="recaptcha-container" style={{ position: 'absolute', left: '-9999px' }} />
-
           {step === 'phone' ? (
-            <div className="glass-card !rounded-[24px] p-6">
+            <div className="glass-card !rounded-[24px] p-6 mt-4">
               <h1 className="text-2xl font-bold text-[#1a1a1a] mb-2">สร้างร้านค้า</h1>
               <p className="text-[#7a6f63] mb-6">กรอกเบอร์โทรศัพท์เพื่อเริ่มต้น</p>
 
@@ -297,10 +293,14 @@ export default function SellerSignupPage() {
                     เข้าสู่ระบบ
                   </Link>
                 </p>
+
+                <p className="text-center text-xs text-[#a69a8c]">
+                  Protected by reCAPTCHA
+                </p>
               </div>
             </div>
           ) : (
-            <div className="glass-card !rounded-[24px] p-6">
+            <div className="glass-card !rounded-[24px] p-6 mt-4">
               <h1 className="text-2xl font-bold text-[#1a1a1a] mb-2">ยืนยันเบอร์โทร</h1>
               <p className="text-[#7a6f63] mb-6">
                 รหัส OTP ถูกส่งไปที่ {formatPhoneDisplay(phone)}
@@ -337,7 +337,7 @@ export default function SellerSignupPage() {
                       countdown > 0 ? 'opacity-50' : ''
                     }`}
                   >
-                    {countdown > 0 ? `ส่งรหัสใหม่ (${countdown}s)` : 'ส่งรหัสใหม่'}
+                    {countdown > 0 ? `ส่งใหม่ (${countdown}s)` : 'ส่งรหัสใหม่'}
                   </button>
 
                   <button
@@ -348,6 +348,10 @@ export default function SellerSignupPage() {
                     เปลี่ยนเบอร์
                   </button>
                 </div>
+
+                <p className="text-center text-xs text-[#a69a8c]">
+                  Protected by reCAPTCHA
+                </p>
               </div>
             </div>
           )}
