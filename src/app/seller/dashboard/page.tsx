@@ -235,9 +235,9 @@ export default function SellerDashboard() {
       <div className="ambient-1" />
       <div className="ambient-2" />
 
-      <div className="px-4 pb-24 relative z-10">
+      <div className="px-4 pb-24 pt-[env(safe-area-inset-top)] relative z-10">
         {/* Header with Preview and QR Buttons */}
-        <div className="flex items-center justify-between pt-4">
+        <div className="flex items-center justify-between pt-2">
           <div className="flex-1">
             <DashboardHeader shopName={seller?.shop_name || ''} />
           </div>
@@ -280,7 +280,7 @@ export default function SellerDashboard() {
         </div>
 
         {/* Stats */}
-        <div className="mb-6 mt-4">
+        <div className="mb-4 mt-2">
           <StatsCard
             totalEarnings={stats?.total_earnings || 0}
             shopSlug={seller?.shop_slug || ''}
@@ -290,7 +290,7 @@ export default function SellerDashboard() {
         </div>
 
         {/* Quick Actions - matches prototype design */}
-        <div className="grid grid-cols-4 gap-2.5 mb-6">
+        <div className="grid grid-cols-4 gap-2.5 mb-4">
           <Link
             href="/seller/products"
             className="flex flex-col items-center gap-1.5 py-4 px-2 glass-card !rounded-[16px] hover:-translate-y-1 transition-transform"
@@ -325,7 +325,7 @@ export default function SellerDashboard() {
 
         {/* Confirmation Banner */}
         {stats && stats.pending_orders > 0 && (
-          <div className="mb-6">
+          <div className="mb-4">
             <ConfirmationBanner
               pendingCount={stats.pending_orders}
               onConfirmAll={handleConfirmAll}
