@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { sendOTP } from '@/lib/messagebird'
+import { sendOTP } from '@/lib/sms'
 
 // Rate limiting: track OTP requests per phone (in-memory for serverless)
 const otpRequests = new Map<string, { count: number; resetAt: number }>()
@@ -53,7 +53,7 @@ export async function POST(request: NextRequest) {
 
     const internationalPhone = toInternationalPhone(phone)
 
-    // Rate limiting: max 3 OTP requests per phone per hour
+    // Rate limiting: max 5 OTP requests per phone per hour
     const now = Date.now()
     const hourMs = 60 * 60 * 1000
     const phoneKey = internationalPhone
@@ -61,7 +61,7 @@ export async function POST(request: NextRequest) {
 
     if (rateLimit) {
       if (now < rateLimit.resetAt) {
-        if (rateLimit.count >= 3) {
+        if (rateLimit.count >= 5) {
           return NextResponse.json(
             { success: false, error: 'rate_limited', message: 'ส่ง OTP มากเกินไป กรุณารอ 1 ชั่วโมง' },
             { status: 429 }
@@ -75,7 +75,7 @@ export async function POST(request: NextRequest) {
       otpRequests.set(phoneKey, { count: 1, resetAt: now + hourMs })
     }
 
-    // Send OTP via Twilio Verify
+    // Send OTP via our simple system
     const result = await sendOTP(internationalPhone)
 
     if (!result.success) {
@@ -85,16 +85,22 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Twilio handles OTP state - no database storage needed
-
     // Return success (mask phone number in response)
     const maskedPhone = phone.replace(/(\d{3})\d{4}(\d{3})/, '$1-XXX-$2')
 
-    return NextResponse.json({
+    // In dev mode, include the OTP code for testing
+    const response: { success: boolean; message: string; phone: string; code?: string } = {
       success: true,
       message: `รหัส OTP ถูกส่งไปที่ ${maskedPhone}`,
       phone: internationalPhone
-    })
+    }
+
+    // Include code in dev mode for easy testing
+    if (result.code) {
+      response.code = result.code
+    }
+
+    return NextResponse.json(response)
 
   } catch (error) {
     console.error('Send OTP error:', error)

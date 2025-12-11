@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { cookies } from 'next/headers'
-import { verifyOTP } from '@/lib/messagebird'
+import { verifyOTP } from '@/lib/sms'
 
 export async function POST(request: NextRequest) {
   try {
@@ -24,13 +24,7 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Initialize Supabase with service role
-    const supabase = createClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.SUPABASE_SERVICE_ROLE_KEY!
-    )
-
-    // Verify OTP via Twilio (uses phone number directly)
+    // Verify OTP against our database
     const verifyResult = await verifyOTP(phone, code)
 
     if (!verifyResult.success) {
@@ -40,7 +34,11 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Twilio handles verification state, no need to track in DB
+    // Initialize Supabase with service role
+    const supabase = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.SUPABASE_SERVICE_ROLE_KEY!
+    )
 
     // Check if seller already exists
     const { data: existingSeller } = await supabase
@@ -95,8 +93,6 @@ export async function POST(request: NextRequest) {
       maxAge: 60 * 60 * 24 * 30, // 30 days
       path: '/'
     })
-
-    // Twilio handles OTP verification state - no DB cleanup needed
 
     // Determine where to redirect
     let redirectTo = '/seller/dashboard'
