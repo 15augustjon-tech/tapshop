@@ -6,9 +6,21 @@ const supabase = createClient(
   process.env.SUPABASE_SERVICE_ROLE_KEY!
 )
 
+// Test phone numbers (always use code 123456)
+const TEST_PHONES = [
+  '+66858704317',
+  '0858704317',
+]
+
 // Generate 6-digit OTP
 function generateOTP(): string {
   return Math.floor(100000 + Math.random() * 900000).toString()
+}
+
+// Check if phone is a test number
+function isTestPhone(phone: string): boolean {
+  const digits = phone.replace(/\D/g, '')
+  return TEST_PHONES.some(t => t.replace(/\D/g, '') === digits)
 }
 
 /**
@@ -16,7 +28,8 @@ function generateOTP(): string {
  */
 export async function sendOTP(phone: string): Promise<{ success: boolean; error?: string; code?: string }> {
   try {
-    const code = generateOTP()
+    // Test phone always uses 123456
+    const code = isTestPhone(phone) ? '123456' : generateOTP()
     const expiresAt = new Date(Date.now() + 10 * 60 * 1000) // 10 minutes
 
     // Delete any existing OTP for this phone
@@ -39,6 +52,12 @@ export async function sendOTP(phone: string): Promise<{ success: boolean; error?
     if (insertError) {
       console.error('Failed to store OTP:', insertError)
       return { success: false, error: 'เกิดข้อผิดพลาด กรุณาลองใหม่' }
+    }
+
+    // Skip SMS for test phones
+    if (isTestPhone(phone)) {
+      console.log(`[TEST] OTP for ${phone}: ${code}`)
+      return { success: true, code }
     }
 
     // Send SMS via TextBelt (free tier: 1 SMS/day, or use paid)
