@@ -12,21 +12,14 @@ async function getShopData(shopSlug: string) {
     process.env.SUPABASE_SERVICE_ROLE_KEY!
   )
 
-  // Fetch seller by shop_slug (case-insensitive)
+  // Fetch seller by shop_slug
   const { data: seller, error: sellerError } = await supabase
     .from('sellers')
-    .select('id, shop_name, shop_slug, shop_bio, is_active, onboarding_completed')
-    .ilike('shop_slug', shopSlug)
+    .select('id, shop_name, shop_slug, shop_bio, is_active')
+    .eq('shop_slug', shopSlug.toLowerCase())
     .single()
 
-  if (sellerError || !seller) {
-    console.log('Shop not found:', shopSlug, sellerError)
-    return null
-  }
-
-  // Shop must be active and onboarding complete
-  if (seller.is_active === false || !seller.onboarding_completed) {
-    console.log('Shop not active or onboarding incomplete:', seller.shop_slug)
+  if (sellerError || !seller || !seller.is_active) {
     return null
   }
 
