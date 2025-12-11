@@ -1,5 +1,5 @@
 import { notFound } from 'next/navigation'
-import { createClient } from '@supabase/supabase-js'
+import { headers } from 'next/headers'
 import ShopClient from './ShopClient'
 
 // Force dynamic rendering - don't cache this page
@@ -10,52 +10,54 @@ interface Props {
   params: Promise<{ shopname: string }>
 }
 
-async function getShopData(shopSlug: string) {
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
-  const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY
+interface ShopData {
+  seller: {
+    shop_name: string
+    shop_slug: string
+    shop_bio?: string
+  }
+  products: Array<{
+    id: string
+    name: string
+    price: number
+    stock: number
+    image_url: string | null
+    is_active: boolean
+  }>
+}
 
-  if (!supabaseUrl || !supabaseKey) {
-    console.error('Missing Supabase environment variables')
+async function getShopData(shopSlug: string): Promise<ShopData | null> {
+  try {
+    // Get the host from headers to build absolute URL
+    const headersList = await headers()
+    const host = headersList.get('host') || 'tapshop.me'
+    const protocol = host.includes('localhost') ? 'http' : 'https'
+    const baseUrl = `${protocol}://${host}`
+
+    const res = await fetch(`${baseUrl}/api/shops/${shopSlug}`, {
+      cache: 'no-store',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    })
+
+    if (!res.ok) {
+      return null
+    }
+
+    const data = await res.json()
+
+    if (!data.success) {
+      return null
+    }
+
+    return {
+      seller: data.seller,
+      products: data.products || []
+    }
+  } catch (error) {
+    console.error('Failed to fetch shop data:', error)
     return null
-  }
-
-  const supabase = createClient(supabaseUrl, supabaseKey)
-
-  // Fetch seller by shop_slug
-  const { data: seller, error: sellerError } = await supabase
-    .from('sellers')
-    .select('id, shop_name, shop_slug, shop_bio, is_active')
-    .eq('shop_slug', shopSlug.toLowerCase())
-    .single()
-
-  if (sellerError) {
-    console.error('Seller fetch error:', sellerError)
-    return null
-  }
-
-  if (!seller || !seller.is_active) {
-    return null
-  }
-
-  // Fetch active products
-  const { data: products, error: productsError } = await supabase
-    .from('products')
-    .select('id, name, price, stock, image_url, is_active')
-    .eq('seller_id', seller.id)
-    .eq('is_active', true)
-    .order('created_at', { ascending: false })
-
-  if (productsError) {
-    console.error('Products fetch error:', productsError)
-  }
-
-  return {
-    seller: {
-      shop_name: seller.shop_name,
-      shop_slug: seller.shop_slug,
-      shop_bio: seller.shop_bio
-    },
-    products: products || []
   }
 }
 
