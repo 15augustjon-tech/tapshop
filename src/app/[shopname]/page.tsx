@@ -1,5 +1,5 @@
 import { notFound } from 'next/navigation'
-import { headers } from 'next/headers'
+import { createClient } from '@supabase/supabase-js'
 import ShopClient from './ShopClient'
 
 // Force dynamic rendering - don't cache this page
@@ -10,54 +10,45 @@ interface Props {
   params: Promise<{ shopname: string }>
 }
 
-interface ShopData {
-  seller: {
-    shop_name: string
-    shop_slug: string
-    shop_bio?: string
-  }
-  products: Array<{
-    id: string
-    name: string
-    price: number
-    stock: number
-    image_url: string | null
-    is_active: boolean
-  }>
-}
+async function getShopData(shopSlug: string) {
+  // Create Supabase client - same as working API route
+  const supabase = createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!
+  )
 
-async function getShopData(shopSlug: string): Promise<ShopData | null> {
-  try {
-    // Get the host from headers to build absolute URL
-    const headersList = await headers()
-    const host = headersList.get('host') || 'tapshop.me'
-    const protocol = host.includes('localhost') ? 'http' : 'https'
-    const baseUrl = `${protocol}://${host}`
+  // Fetch seller by shop_slug - exact same query as API
+  const { data: seller, error: sellerError } = await supabase
+    .from('sellers')
+    .select('id, shop_name, shop_slug, shop_bio, is_active')
+    .eq('shop_slug', shopSlug.toLowerCase())
+    .single()
 
-    const res = await fetch(`${baseUrl}/api/shops/${shopSlug}`, {
-      cache: 'no-store',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    })
-
-    if (!res.ok) {
-      return null
-    }
-
-    const data = await res.json()
-
-    if (!data.success) {
-      return null
-    }
-
-    return {
-      seller: data.seller,
-      products: data.products || []
-    }
-  } catch (error) {
-    console.error('Failed to fetch shop data:', error)
+  if (sellerError || !seller) {
+    console.log('Shop not found:', shopSlug, sellerError)
     return null
+  }
+
+  if (!seller.is_active) {
+    console.log('Shop inactive:', shopSlug)
+    return null
+  }
+
+  // Fetch active products
+  const { data: products } = await supabase
+    .from('products')
+    .select('id, name, price, stock, image_url, is_active')
+    .eq('seller_id', seller.id)
+    .eq('is_active', true)
+    .order('created_at', { ascending: false })
+
+  return {
+    seller: {
+      shop_name: seller.shop_name,
+      shop_slug: seller.shop_slug,
+      shop_bio: seller.shop_bio
+    },
+    products: products || []
   }
 }
 
