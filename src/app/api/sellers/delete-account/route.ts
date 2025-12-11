@@ -29,16 +29,25 @@ export async function DELETE() {
     }
 
     // 2. Delete seller - CASCADE handles products, orders, order_items, deliveries
-    const { error } = await supabase
+    const { data: deletedSeller, error } = await supabase
       .from('sellers')
       .delete()
       .eq('id', sellerId)
+      .select()
 
     if (error) {
       console.error('Delete seller error:', error)
       return NextResponse.json(
-        { success: false, message: 'ลบบัญชีไม่สำเร็จ' },
+        { success: false, message: `ลบบัญชีไม่สำเร็จ: ${error.message}` },
         { status: 500 }
+      )
+    }
+
+    if (!deletedSeller || deletedSeller.length === 0) {
+      console.error('No seller found to delete:', sellerId)
+      return NextResponse.json(
+        { success: false, message: 'ไม่พบบัญชีที่จะลบ' },
+        { status: 404 }
       )
     }
 
