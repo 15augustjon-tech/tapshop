@@ -56,12 +56,11 @@ export async function POST(request: NextRequest) {
     if (existingSeller) {
       seller = existingSeller
     } else {
-      // Create new seller with phone and Firebase UID
+      // Create new seller with phone (firebase_uid is optional)
       const { data: newSeller, error: createError } = await supabase
         .from('sellers')
         .insert({
           phone,
-          firebase_uid: decodedToken.uid,
           is_active: true,
           onboarding_completed: false
         })
@@ -78,14 +77,6 @@ export async function POST(request: NextRequest) {
 
       seller = newSeller
       isNew = true
-    }
-
-    // Update Firebase UID if not set
-    if (!existingSeller?.firebase_uid && decodedToken.uid) {
-      await supabase
-        .from('sellers')
-        .update({ firebase_uid: decodedToken.uid })
-        .eq('id', seller.id)
     }
 
     // Create session cookie

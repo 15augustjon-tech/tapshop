@@ -56,12 +56,11 @@ export async function POST(request: NextRequest) {
     if (existingBuyer) {
       buyer = existingBuyer
     } else {
-      // Create new buyer with phone and Firebase UID
+      // Create new buyer with phone only (firebase_uid column may not exist)
       const { data: newBuyer, error: createError } = await supabase
         .from('buyers')
         .insert({
-          phone,
-          firebase_uid: decodedToken.uid
+          phone
         })
         .select()
         .single()
@@ -76,14 +75,6 @@ export async function POST(request: NextRequest) {
 
       buyer = newBuyer
       isNew = true
-    }
-
-    // Update Firebase UID if not set
-    if (!existingBuyer?.firebase_uid && decodedToken.uid) {
-      await supabase
-        .from('buyers')
-        .update({ firebase_uid: decodedToken.uid })
-        .eq('id', buyer.id)
     }
 
     // Create session cookies
