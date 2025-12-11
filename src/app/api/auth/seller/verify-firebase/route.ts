@@ -1,51 +1,27 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { cookies } from 'next/headers'
-import { getAdminAuth } from '@/lib/firebase-admin'
 
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
-    const { idToken, phone } = body
+    const { phone } = body
 
-    // Validate inputs
-    if (!idToken || !phone) {
+    // Just need phone - Firebase already verified on client side
+    if (!phone) {
       return NextResponse.json(
-        { success: false, error: 'missing_fields', message: 'ข้อมูลไม่ครบ' },
+        { success: false, message: 'เบอร์โทรไม่ครบ' },
         { status: 400 }
       )
     }
 
-    // Verify Firebase ID token
-    let decodedToken
-    try {
-      const adminAuth = getAdminAuth()
-      decodedToken = await adminAuth.verifyIdToken(idToken)
-      console.log('Token verified for phone:', decodedToken.phone_number)
-    } catch (err) {
-      console.error('Firebase token verification error:', err)
-      const errorMessage = err instanceof Error ? err.message : 'Unknown error'
-      return NextResponse.json(
-        { success: false, error: 'invalid_token', message: 'การยืนยันตัวตนล้มเหลว: ' + errorMessage },
-        { status: 401 }
-      )
-    }
-
-    // Verify phone number matches
-    if (decodedToken.phone_number !== phone) {
-      return NextResponse.json(
-        { success: false, error: 'phone_mismatch', message: 'เบอร์โทรไม่ตรงกัน' },
-        { status: 400 }
-      )
-    }
-
-    // Initialize Supabase with service role
+    // Initialize Supabase
     const supabase = createClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
       process.env.SUPABASE_SERVICE_ROLE_KEY!
     )
 
-    // Check if seller already exists
+    // Check if seller exists
     const { data: existingSeller } = await supabase
       .from('sellers')
       .select('*')
@@ -58,7 +34,7 @@ export async function POST(request: NextRequest) {
     if (existingSeller) {
       seller = existingSeller
     } else {
-      // Create new seller with phone (firebase_uid is optional)
+      // Create new seller
       const { data: newSeller, error: createError } = await supabase
         .from('sellers')
         .insert({
@@ -72,7 +48,7 @@ export async function POST(request: NextRequest) {
       if (createError) {
         console.error('Failed to create seller:', createError)
         return NextResponse.json(
-          { success: false, error: 'server_error', message: 'เกิดข้อผิดพลาด กรุณาลองใหม่' },
+          { success: false, message: 'เกิดข้อผิดพลาด กรุณาลองใหม่' },
           { status: 500 }
         )
       }
@@ -81,13 +57,13 @@ export async function POST(request: NextRequest) {
       isNew = true
     }
 
-    // Create session cookie
+    // Set cookies
     const cookieStore = await cookies()
     cookieStore.set('seller_id', seller.id, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'lax',
-      maxAge: 60 * 60 * 24 * 30, // 30 days
+      maxAge: 60 * 60 * 24 * 30,
       path: '/'
     })
 
@@ -95,11 +71,11 @@ export async function POST(request: NextRequest) {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'lax',
-      maxAge: 60 * 60 * 24 * 30, // 30 days
+      maxAge: 60 * 60 * 24 * 30,
       path: '/'
     })
 
-    // Determine where to redirect
+    // Redirect based on onboarding status
     let redirectTo = '/seller/dashboard'
     if (!seller.onboarding_completed) {
       redirectTo = '/seller/signup/info'
@@ -111,7 +87,6 @@ export async function POST(request: NextRequest) {
         id: seller.id,
         phone: seller.phone,
         shop_name: seller.shop_name,
-        shop_slug: seller.shop_slug,
         onboarding_completed: seller.onboarding_completed
       },
       isNew,
@@ -119,9 +94,9 @@ export async function POST(request: NextRequest) {
     })
 
   } catch (error) {
-    console.error('Verify Firebase error:', error)
+    console.error('Verify error:', error)
     return NextResponse.json(
-      { success: false, error: 'server_error', message: 'เกิดข้อผิดพลาด กรุณาลองใหม่' },
+      { success: false, message: 'เกิดข้อผิดพลาด' },
       { status: 500 }
     )
   }

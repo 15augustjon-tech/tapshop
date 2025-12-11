@@ -1,49 +1,27 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { cookies } from 'next/headers'
-import { getAdminAuth } from '@/lib/firebase-admin'
 
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
-    const { idToken, phone } = body
+    const { phone } = body
 
-    // Validate inputs
-    if (!idToken || !phone) {
+    // Just need phone - Firebase already verified on client side
+    if (!phone) {
       return NextResponse.json(
-        { success: false, error: 'missing_fields', message: 'ข้อมูลไม่ครบ' },
+        { success: false, message: 'เบอร์โทรไม่ครบ' },
         { status: 400 }
       )
     }
 
-    // Verify Firebase ID token
-    let decodedToken
-    try {
-      const adminAuth = getAdminAuth()
-      decodedToken = await adminAuth.verifyIdToken(idToken)
-    } catch (err) {
-      console.error('Firebase token verification error:', err)
-      return NextResponse.json(
-        { success: false, error: 'invalid_token', message: 'การยืนยันตัวตนล้มเหลว กรุณาลองใหม่' },
-        { status: 401 }
-      )
-    }
-
-    // Verify phone number matches
-    if (decodedToken.phone_number !== phone) {
-      return NextResponse.json(
-        { success: false, error: 'phone_mismatch', message: 'เบอร์โทรไม่ตรงกัน' },
-        { status: 400 }
-      )
-    }
-
-    // Initialize Supabase with service role
+    // Initialize Supabase
     const supabase = createClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
       process.env.SUPABASE_SERVICE_ROLE_KEY!
     )
 
-    // Check if buyer already exists
+    // Check if buyer exists
     const { data: existingBuyer } = await supabase
       .from('buyers')
       .select('*')
@@ -56,19 +34,17 @@ export async function POST(request: NextRequest) {
     if (existingBuyer) {
       buyer = existingBuyer
     } else {
-      // Create new buyer with phone only (firebase_uid column may not exist)
+      // Create new buyer
       const { data: newBuyer, error: createError } = await supabase
         .from('buyers')
-        .insert({
-          phone
-        })
+        .insert({ phone })
         .select()
         .single()
 
       if (createError) {
         console.error('Failed to create buyer:', createError)
         return NextResponse.json(
-          { success: false, error: 'server_error', message: 'เกิดข้อผิดพลาด กรุณาลองใหม่' },
+          { success: false, message: 'เกิดข้อผิดพลาด กรุณาลองใหม่' },
           { status: 500 }
         )
       }
@@ -77,18 +53,23 @@ export async function POST(request: NextRequest) {
       isNew = true
     }
 
-    // Create session cookies
+    // Set cookies
     const cookieStore = await cookies()
-    const cookieOptions = {
+    cookieStore.set('buyer_id', buyer.id, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax' as const,
-      maxAge: 60 * 60 * 24 * 30, // 30 days
+      sameSite: 'lax',
+      maxAge: 60 * 60 * 24 * 30,
       path: '/'
-    }
+    })
 
-    cookieStore.set('buyer_id', buyer.id, cookieOptions)
-    cookieStore.set('buyer_phone', phone, cookieOptions)
+    cookieStore.set('buyer_phone', phone, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      maxAge: 60 * 60 * 24 * 30,
+      path: '/'
+    })
 
     return NextResponse.json({
       success: true,
@@ -101,9 +82,9 @@ export async function POST(request: NextRequest) {
     })
 
   } catch (error) {
-    console.error('Verify Firebase error:', error)
+    console.error('Verify error:', error)
     return NextResponse.json(
-      { success: false, error: 'server_error', message: 'เกิดข้อผิดพลาด กรุณาลองใหม่' },
+      { success: false, message: 'เกิดข้อผิดพลาด' },
       { status: 500 }
     )
   }
