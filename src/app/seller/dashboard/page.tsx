@@ -284,7 +284,43 @@ export default function SellerDashboard() {
           <StatsCard
             totalEarnings={stats?.total_earnings || 0}
             shopSlug={seller?.shop_slug || ''}
+            todayOrders={stats?.total_orders || 0}
+            totalViews={0}
           />
+        </div>
+
+        {/* Quick Actions - matches prototype design */}
+        <div className="grid grid-cols-4 gap-2.5 mb-6">
+          <Link
+            href="/seller/products"
+            className="flex flex-col items-center gap-1.5 py-4 px-2 glass-card !rounded-[16px] hover:-translate-y-1 transition-transform"
+          >
+            <span className="text-2xl">📦</span>
+            <span className="text-[11px] font-semibold text-[#7a6f63]">สินค้า</span>
+          </Link>
+          <Link
+            href="/seller/products/new"
+            className="flex flex-col items-center gap-1.5 py-4 px-2 glass-card !rounded-[16px] hover:-translate-y-1 transition-transform"
+          >
+            <span className="text-2xl">➕</span>
+            <span className="text-[11px] font-semibold text-[#7a6f63]">เพิ่มใหม่</span>
+          </Link>
+          <a
+            href={`/${seller?.shop_slug}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex flex-col items-center gap-1.5 py-4 px-2 glass-card !rounded-[16px] hover:-translate-y-1 transition-transform"
+          >
+            <span className="text-2xl">👁️</span>
+            <span className="text-[11px] font-semibold text-[#7a6f63]">ดูร้าน</span>
+          </a>
+          <button
+            onClick={() => setShowQRModal(true)}
+            className="flex flex-col items-center gap-1.5 py-4 px-2 glass-card !rounded-[16px] hover:-translate-y-1 transition-transform"
+          >
+            <span className="text-2xl">📱</span>
+            <span className="text-[11px] font-semibold text-[#7a6f63]">QR Code</span>
+          </button>
         </div>
 
         {/* Confirmation Banner */}

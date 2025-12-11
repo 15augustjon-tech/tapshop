@@ -32,10 +32,8 @@ export default function SuccessPage() {
 
   return (
     <div className="min-h-screen bg-gradient-main overflow-x-hidden flex flex-col items-center justify-center">
-      {/* Ambient Lights */}
       <div className="ambient-1" />
       <div className="ambient-2" />
-
       <div className="px-4 py-8 w-full max-w-md mx-auto text-center relative z-10">
         {/* Success Icon with animation */}
         <div className="w-24 h-24 mx-auto mb-8 rounded-full bg-gradient-to-br from-[#22c55e] to-[#16a34a] flex items-center justify-center shadow-lg animate-pop">

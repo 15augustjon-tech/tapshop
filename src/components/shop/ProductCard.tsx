@@ -71,9 +71,17 @@ export default function ProductCard({ product, onClick }: ProductCardProps) {
           <h3 className="font-semibold text-[#1a1a1a] line-clamp-2 text-[14px] leading-snug mb-1.5">
             {product.name}
           </h3>
-          <span className="text-[17px] font-bold text-[#1a1a1a]">
-            ฿{product.price.toLocaleString()}
-          </span>
+          <div className="flex items-center justify-between">
+            <span className="text-[17px] font-bold text-[#1a1a1a]">
+              ฿{product.price.toLocaleString()}
+            </span>
+          </div>
+          {/* Stock indicator */}
+          {!isOutOfStock && (
+            <p className={`text-[11px] font-semibold mt-1 ${isLowStock ? 'text-[#f59e0b]' : 'text-[#22c55e]'}`}>
+              {isLowStock ? `เหลือ ${product.stock} ชิ้น` : `มีสินค้า ${product.stock} ชิ้น`}
+            </p>
+          )}
         </div>
       </div>
     </button>

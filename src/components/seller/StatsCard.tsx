@@ -1,65 +1,54 @@
 'use client'
 
-import { useState } from 'react'
-
 interface StatsCardProps {
   totalEarnings: number
   shopSlug: string
+  todayOrders?: number
+  totalViews?: number
 }
 
-export default function StatsCard({ totalEarnings, shopSlug }: StatsCardProps) {
-  const [copied, setCopied] = useState(false)
-  const shopUrl = `tapshop.me/${shopSlug}`
-
-  const handleCopy = async () => {
-    try {
-      await navigator.clipboard.writeText(`https://${shopUrl}`)
-      setCopied(true)
-      setTimeout(() => setCopied(false), 2000)
-    } catch (err) {
-      console.error('Failed to copy:', err)
-    }
-  }
-
+export default function StatsCard({ totalEarnings, todayOrders = 0, totalViews = 0 }: StatsCardProps) {
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('th-TH').format(amount)
   }
 
   return (
-    <div className="glass-card !rounded-[24px] p-6 overflow-hidden relative">
-      {/* Decorative gradient */}
-      <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-[#22c55e]/10 to-transparent rounded-full -translate-y-1/2 translate-x-1/2" />
-
-      {/* Earnings */}
-      <div className="mb-5 relative z-10">
-        <div className="flex items-baseline gap-1">
-          <span className="text-lg text-[#7a6f63]">฿</span>
-          <span className="text-4xl font-bold text-[#1a1a1a]">{formatCurrency(totalEarnings)}</span>
-        </div>
-        <p className="text-[#7a6f63] text-sm mt-1">รายได้ทั้งหมด</p>
+    <div className="rounded-[24px] p-6 overflow-hidden relative" style={{
+      background: 'linear-gradient(135deg, rgba(240,253,244,0.95) 0%, rgba(220,252,231,0.85) 100%)',
+      backdropFilter: 'blur(40px)',
+      border: '1.5px solid rgba(134,239,172,0.4)',
+      boxShadow: '0 8px 32px rgba(34,197,94,0.1)'
+    }}>
+      {/* Header */}
+      <div className="flex justify-between items-center mb-4">
+        <span className="text-[13px] font-semibold text-[#166534]">รายได้วันนี้</span>
+        <span className="text-[12px] font-semibold text-[#22c55e] px-2.5 py-1 bg-white/60 rounded-full">วันนี้</span>
       </div>
 
-      {/* Shop Link */}
-      {shopSlug && (
-        <div className="glass-card-inner !rounded-[14px] p-3 flex items-center gap-2">
-          <div className="icon-box w-9 h-9 !rounded-[10px] flex-shrink-0">
-            <svg className="w-4 h-4 text-[#7a6f63]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
-            </svg>
-          </div>
-          <span className="flex-1 text-sm font-medium text-[#1a1a1a] truncate">{shopUrl}</span>
-          <button
-            onClick={handleCopy}
-            className={`px-3 py-1.5 rounded-full text-sm font-medium transition-all ${
-              copied
-                ? 'bg-gradient-to-br from-[#22c55e] to-[#16a34a] text-white'
-                : 'glass-card-inner hover:bg-white/60 text-[#1a1a1a]'
-            }`}
-          >
-            {copied ? 'คัดลอกแล้ว!' : 'คัดลอก'}
-          </button>
+      {/* Main Revenue */}
+      <div className="mb-1">
+        <span className="text-4xl font-black text-[#166534] tracking-tight">฿{formatCurrency(totalEarnings)}</span>
+      </div>
+      <div className="flex items-center gap-1 text-[13px] font-semibold text-[#22c55e] mb-5">
+        <span>↑</span>
+        <span>เปิดร้านแล้ว</span>
+      </div>
+
+      {/* Stats Grid */}
+      <div className="grid grid-cols-3 gap-3">
+        <div className="text-center py-3 px-2 bg-white/60 rounded-[14px]">
+          <div className="text-xl font-extrabold text-[#166534]">{todayOrders}</div>
+          <div className="text-[11px] font-semibold text-[#22c55e] mt-0.5">ออเดอร์</div>
         </div>
-      )}
+        <div className="text-center py-3 px-2 bg-white/60 rounded-[14px]">
+          <div className="text-xl font-extrabold text-[#166534]">4.9</div>
+          <div className="text-[11px] font-semibold text-[#22c55e] mt-0.5">Rating ⭐</div>
+        </div>
+        <div className="text-center py-3 px-2 bg-white/60 rounded-[14px]">
+          <div className="text-xl font-extrabold text-[#166534]">{totalViews}</div>
+          <div className="text-[11px] font-semibold text-[#22c55e] mt-0.5">เข้าชม</div>
+        </div>
+      </div>
     </div>
   )
 }

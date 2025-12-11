@@ -11,24 +11,27 @@ export default function StickyCartBar({ itemCount, subtotal, onClick }: StickyCa
   if (itemCount === 0) return null
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 z-30 px-4 pb-4 safe-area-bottom animate-slide-up">
-      <div className="glass-card p-4 !rounded-[24px]">
-        <div className="flex items-center justify-between relative z-10">
+    <div className="fixed bottom-0 left-0 right-0 z-30 animate-slide-up">
+      <div
+        className="px-5 py-4 safe-area-bottom"
+        style={{
+          background: 'linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%)'
+        }}
+      >
+        <div className="max-w-md mx-auto flex items-center justify-between">
           {/* Cart Summary */}
-          <div>
-            <p className="text-[13px] text-[#7a6f63]">{itemCount} รายการในตะกร้า</p>
-            <p className="text-[20px] font-bold text-[#1a1a1a]">฿{subtotal.toLocaleString()}</p>
+          <div className="text-white">
+            <p className="text-sm font-semibold opacity-80">🛒 {itemCount} รายการ</p>
+            <p className="text-xl font-extrabold">฿{subtotal.toLocaleString()}</p>
           </div>
 
-          {/* Checkout Button */}
+          {/* View Cart Button */}
           <button
             onClick={onClick}
-            className="btn-primary !py-4 !px-6"
+            className="flex items-center gap-2 bg-white text-[#1a1a1a] px-7 py-3.5 rounded-full font-bold text-[15px] hover:scale-105 transition-transform"
           >
             ดูตะกร้า
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9 5l7 7-7 7" />
-            </svg>
+            <span>→</span>
           </button>
         </div>
       </div>

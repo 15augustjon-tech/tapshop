@@ -17,10 +17,11 @@ import { useCart } from '@/hooks/useCart'
 interface ShopClientProps {
   shopName: string
   shopSlug: string
+  shopBio?: string | null
   products: Product[]
 }
 
-export default function ShopClient({ shopName, shopSlug, products }: ShopClientProps) {
+export default function ShopClient({ shopName, shopSlug, shopBio, products }: ShopClientProps) {
   const router = useRouter()
   const {
     items,
@@ -79,6 +80,7 @@ export default function ShopClient({ shopName, shopSlug, products }: ShopClientP
 
         <ShopHeader
           shopName={shopName}
+          shopBio={shopBio || undefined}
           cartCount={0}
           onCartClick={() => {}}
         />
@@ -109,6 +111,7 @@ export default function ShopClient({ shopName, shopSlug, products }: ShopClientP
       {/* Header */}
       <ShopHeader
         shopName={shopName}
+        shopBio={shopBio || undefined}
         cartCount={itemCount}
         onCartClick={() => setIsCartOpen(true)}
       />

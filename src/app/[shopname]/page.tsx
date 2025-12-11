@@ -15,7 +15,7 @@ async function getShopData(shopSlug: string) {
   // Fetch seller by shop_slug
   const { data: seller, error: sellerError } = await supabase
     .from('sellers')
-    .select('id, shop_name, shop_slug, is_active')
+    .select('id, shop_name, shop_slug, shop_bio, is_active')
     .eq('shop_slug', shopSlug.toLowerCase())
     .single()
 
@@ -34,7 +34,8 @@ async function getShopData(shopSlug: string) {
   return {
     seller: {
       shop_name: seller.shop_name,
-      shop_slug: seller.shop_slug
+      shop_slug: seller.shop_slug,
+      shop_bio: seller.shop_bio
     },
     products: products || []
   }
@@ -68,6 +69,7 @@ export default async function ShopPage({ params }: Props) {
     <ShopClient
       shopName={data.seller.shop_name}
       shopSlug={data.seller.shop_slug}
+      shopBio={data.seller.shop_bio}
       products={data.products}
     />
   )

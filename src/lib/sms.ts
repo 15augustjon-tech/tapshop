@@ -19,8 +19,22 @@ function generateOTP(): string {
 
 // Check if phone is a test number
 function isTestPhone(phone: string): boolean {
-  const digits = phone.replace(/\D/g, '')
-  return TEST_PHONES.some(t => t.replace(/\D/g, '') === digits)
+  // Normalize to just the 9-digit local number (without country code or leading 0)
+  const normalize = (p: string): string => {
+    const digits = p.replace(/\D/g, '')
+    // Remove country code 66 if present
+    if (digits.startsWith('66') && digits.length === 11) {
+      return digits.slice(2) // 66858704317 -> 858704317
+    }
+    // Remove leading 0 if present
+    if (digits.startsWith('0') && digits.length === 10) {
+      return digits.slice(1) // 0858704317 -> 858704317
+    }
+    return digits
+  }
+
+  const normalizedInput = normalize(phone)
+  return TEST_PHONES.some(t => normalize(t) === normalizedInput)
 }
 
 /**
@@ -60,25 +74,20 @@ export async function sendOTP(phone: string): Promise<{ success: boolean; error?
       return { success: true, code }
     }
 
-    // Send SMS via TextBelt (free tier: 1 SMS/day, or use paid)
-    // For testing, we'll also return the code in dev mode
-    const isDev = process.env.NODE_ENV === 'development'
+    // Try to send SMS
+    const smsResult = await sendSMS(phone, `TapShop: รหัสยืนยันของคุณคือ ${code}`)
 
-    const smsResult = await sendSMS(phone, `TapShop: รหัส OTP ของคุณคือ ${code} (หมดอายุใน 10 นาที)`)
-
-    if (!smsResult.success && !isDev) {
-      // In production, fail if SMS doesn't send
-      // But we already stored the code, so admin could help verify manually
-      console.error('SMS failed but OTP stored:', smsResult.error)
+    if (!smsResult.success) {
+      console.error('SMS failed:', smsResult.error)
+    } else {
+      console.log(`SMS sent successfully to ${phone}`)
     }
 
-    // In dev mode, return the code for testing
-    if (isDev) {
-      console.log(`[DEV] OTP for ${phone}: ${code}`)
-      return { success: true, code }
-    }
-
-    return { success: true }
+    // ALWAYS return the code for now during testing phase
+    // This allows users to still verify even if SMS fails
+    // Remove this once SMS provider is confirmed working
+    console.log(`[OTP] Code for ${phone}: ${code}`)
+    return { success: true, code }
   } catch (error) {
     console.error('Send OTP error:', error)
     return { success: false, error: 'เกิดข้อผิดพลาด กรุณาลองใหม่' }
