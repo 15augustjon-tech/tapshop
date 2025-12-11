@@ -139,7 +139,7 @@ async function sendSMS(phone: string, message: string): Promise<{ success: boole
       body: JSON.stringify({
         phone: formattedPhone,
         message: message,
-        key: 'textbelt' // Free tier key (1 SMS/day) - replace with paid key for production
+        key: process.env.TEXTBELT_API_KEY || 'textbelt'
       })
     })
 
