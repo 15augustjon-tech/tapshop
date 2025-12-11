@@ -44,7 +44,7 @@ export async function sendOTP(phone: string): Promise<{ success: boolean; error?
       .insert({
         phone,
         code,
-        type: 'seller_login',
+        type: 'seller',
         expires_at: expiresAt.toISOString(),
         verified: false
       })
