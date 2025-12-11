@@ -245,48 +245,40 @@ export default function SellerSignupPage() {
 
   if (checkingSession) {
     return (
-      <div className="min-h-screen bg-gradient-main flex items-center justify-center">
-        <div className="icon-box w-16 h-16 !rounded-[20px] animate-pulse">
-          <div className="w-6 h-6 border-2 border-[#1a1a1a] border-t-transparent rounded-full animate-spin" />
-        </div>
+      <div className="min-h-screen bg-[#f6f0e8] flex items-center justify-center">
+        <div className="w-8 h-8 border-2 border-[#1a1a1a] border-t-transparent rounded-full animate-spin" />
       </div>
     )
   }
 
   return (
-    <div className="min-h-[100dvh] bg-gradient-main">
+    <div className="min-h-screen bg-[#f6f0e8]">
       <div id="recaptcha-container" />
 
-      <div className="ambient-1" />
-      <div className="ambient-2" />
-      <div className="bubble bubble-1" />
-      <div className="bubble bubble-2" />
-      <div className="bubble bubble-3" />
-
-      <div className="min-h-[100dvh] flex flex-col px-4 pt-[max(12px,env(safe-area-inset-top))] pb-[max(20px,env(safe-area-inset-bottom))] relative z-10">
+      <div className="min-h-screen flex flex-col px-4 py-safe">
         {/* Header */}
-        <div className="flex items-center justify-between py-2">
-          <Link href="/" className="inline-flex items-center gap-1.5 text-[15px] font-semibold text-[#7a6f63] hover:text-[#1a1a1a] transition-colors">
-            <span>←</span> กลับ
+        <div className="flex items-center justify-between pt-3 pb-2">
+          <Link href="/" className="text-[15px] font-semibold text-[#7a6f63]">
+            ← กลับ
           </Link>
-          <span className="text-[13px] font-semibold text-[#22c55e]">ขั้นตอน 1 / 3</span>
+          <span className="text-sm font-semibold text-[#22c55e]">ขั้นตอน 1 / 3</span>
         </div>
 
         {/* Main content */}
-        <div className="flex-1 flex flex-col justify-center max-w-sm mx-auto w-full py-4">
+        <div className="flex-1 flex flex-col justify-center max-w-sm mx-auto w-full">
           {step === 'phone' ? (
             <>
               {/* Title */}
-              <div className="mb-6 animate-fade-in-down">
-                <h1 className="text-[26px] font-black text-[#1a1a1a] mb-1">สร้างร้านค้า</h1>
+              <div className="mb-6">
+                <h1 className="text-2xl font-black text-[#1a1a1a] mb-1">สร้างร้านค้า</h1>
                 <p className="text-[#7a6f63] text-sm">กรอกเบอร์โทรศัพท์เพื่อเริ่มต้น ใช้เวลาแค่ 1 นาที</p>
               </div>
 
               {/* Form card */}
-              <div className="glass-card !rounded-[24px] p-5 animate-fade-in-up">
+              <div className="bg-white rounded-3xl p-6 shadow-lg border border-white/50">
                 <div className="space-y-4">
                   <div>
-                    <label className="block text-[13px] font-semibold text-[#7a6f63] mb-2">เบอร์โทรศัพท์</label>
+                    <label className="block text-sm font-medium text-[#7a6f63] mb-2">เบอร์โทรศัพท์</label>
                     <PhoneInput
                       value={phone}
                       onChange={setPhone}
@@ -298,19 +290,12 @@ export default function SellerSignupPage() {
                   <button
                     onClick={handleSendOTP}
                     disabled={loading || phone.length < 9}
-                    className="btn-primary w-full !py-3.5 !text-base"
+                    className="w-full py-4 bg-[#1a1a1a] text-white font-semibold rounded-full disabled:opacity-50"
                   >
-                    {loading ? (
-                      <span className="flex items-center justify-center gap-2">
-                        <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                        กำลังส่ง...
-                      </span>
-                    ) : (
-                      'ดำเนินการต่อ →'
-                    )}
+                    {loading ? 'กำลังส่ง...' : 'ดำเนินการต่อ →'}
                   </button>
 
-                  <p className="text-center text-[13px] text-[#7a6f63]">
+                  <p className="text-center text-sm text-[#7a6f63]">
                     มีบัญชีแล้ว?{' '}
                     <Link href="/seller/login" className="text-[#22c55e] font-semibold">
                       เข้าสู่ระบบ
@@ -322,11 +307,11 @@ export default function SellerSignupPage() {
           ) : (
             <>
               {/* OTP Card */}
-              <div className="glass-card !rounded-[24px] p-5 text-center animate-fade-in-up">
+              <div className="bg-white rounded-3xl p-6 shadow-lg border border-white/50 text-center">
                 <div className="text-5xl mb-4">📱</div>
-                <h2 className="text-xl font-extrabold text-[#1a1a1a] mb-1">ยืนยันเบอร์โทร</h2>
+                <h2 className="text-xl font-bold text-[#1a1a1a] mb-1">ยืนยันเบอร์โทร</h2>
                 <p className="text-[#7a6f63] text-sm mb-1">รหัส 6 หลักถูกส่งไปที่</p>
-                <p className="text-base font-bold text-[#1a1a1a] mb-5">{formatPhoneDisplay(phone)}</p>
+                <p className="text-base font-bold text-[#1a1a1a] mb-6">{formatPhoneDisplay(phone)}</p>
 
                 <div className="space-y-4">
                   <OTPInput
@@ -339,19 +324,12 @@ export default function SellerSignupPage() {
                   <button
                     onClick={handleVerifyOTP}
                     disabled={loading || otp.length !== 6}
-                    className="btn-primary w-full !py-3.5 !text-base"
+                    className="w-full py-4 bg-[#1a1a1a] text-white font-semibold rounded-full disabled:opacity-50"
                   >
-                    {loading ? (
-                      <span className="flex items-center justify-center gap-2">
-                        <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                        กำลังยืนยัน...
-                      </span>
-                    ) : (
-                      'ยืนยัน →'
-                    )}
+                    {loading ? 'กำลังยืนยัน...' : 'ยืนยัน →'}
                   </button>
 
-                  <p className="text-[13px] text-[#7a6f63]">
+                  <p className="text-sm text-[#7a6f63]">
                     ไม่ได้รับรหัส?{' '}
                     {countdown > 0 ? (
                       <span className="font-bold text-[#22c55e]">ส่งใหม่ใน {countdown}s</span>
@@ -359,7 +337,7 @@ export default function SellerSignupPage() {
                       <button
                         onClick={handleResend}
                         disabled={loading}
-                        className="font-bold text-[#22c55e] hover:underline"
+                        className="font-bold text-[#22c55e]"
                       >
                         ส่งรหัสใหม่
                       </button>
@@ -369,7 +347,7 @@ export default function SellerSignupPage() {
                   <button
                     onClick={handleChangeNumber}
                     disabled={loading}
-                    className="text-[13px] text-[#7a6f63] font-semibold hover:text-[#1a1a1a] transition-colors"
+                    className="text-sm text-[#7a6f63] font-medium"
                   >
                     ← เปลี่ยนเบอร์โทร
                   </button>

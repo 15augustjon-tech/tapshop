@@ -34,7 +34,7 @@ export default function SellerLoginPage() {
       try {
         window.recaptchaVerifier.clear()
       } catch {
-        // Ignore errors when clearing
+        // Ignore
       }
       window.recaptchaVerifier = undefined
     }
@@ -241,38 +241,30 @@ export default function SellerLoginPage() {
 
   if (checkingSession) {
     return (
-      <div className="min-h-screen bg-gradient-main flex items-center justify-center">
-        <div className="icon-box w-16 h-16 !rounded-[20px] animate-pulse">
-          <div className="w-6 h-6 border-2 border-[#1a1a1a] border-t-transparent rounded-full animate-spin" />
-        </div>
+      <div className="min-h-screen bg-[#f6f0e8] flex items-center justify-center">
+        <div className="w-8 h-8 border-2 border-[#1a1a1a] border-t-transparent rounded-full animate-spin" />
       </div>
     )
   }
 
   return (
-    <div className="min-h-[100dvh] bg-gradient-main">
+    <div className="min-h-screen bg-[#f6f0e8]">
       <div id="recaptcha-container" />
 
-      <div className="ambient-1" />
-      <div className="ambient-2" />
-      <div className="bubble bubble-1" />
-      <div className="bubble bubble-2" />
-      <div className="bubble bubble-3" />
-
-      <div className="min-h-[100dvh] flex flex-col px-4 pt-[max(12px,env(safe-area-inset-top))] pb-[max(20px,env(safe-area-inset-bottom))] relative z-10">
+      <div className="min-h-screen flex flex-col px-4 py-safe">
         {/* Back button */}
-        <div className="py-2">
-          <Link href="/" className="inline-flex items-center gap-1.5 text-[15px] font-semibold text-[#7a6f63] hover:text-[#1a1a1a] transition-colors">
-            <span>←</span> กลับ
+        <div className="pt-3 pb-2">
+          <Link href="/" className="inline-flex items-center gap-1.5 text-[15px] font-semibold text-[#7a6f63]">
+            ← กลับ
           </Link>
         </div>
 
         {/* Main content */}
-        <div className="flex-1 flex flex-col justify-center max-w-sm mx-auto w-full py-4">
+        <div className="flex-1 flex flex-col justify-center max-w-sm mx-auto w-full">
           {step === 'phone' ? (
             <>
               {/* Logo */}
-              <div className="text-center mb-6 animate-fade-in-down">
+              <div className="text-center mb-8">
                 <h1 className="text-4xl font-black tracking-tight mb-1">
                   <span className="text-[#1a1a1a]">Tap</span>
                   <span className="text-[#22c55e]">Shop</span>
@@ -281,13 +273,13 @@ export default function SellerLoginPage() {
               </div>
 
               {/* Login card */}
-              <div className="glass-card !rounded-[24px] p-5 animate-fade-in-up">
-                <h2 className="text-xl font-extrabold text-[#1a1a1a] text-center mb-1">ยินดีต้อนรับ</h2>
-                <p className="text-[#7a6f63] text-center text-sm mb-5">กรอกเบอร์โทรศัพท์เพื่อดำเนินการต่อ</p>
+              <div className="bg-white rounded-3xl p-6 shadow-lg border border-white/50">
+                <h2 className="text-xl font-bold text-[#1a1a1a] text-center mb-1">ยินดีต้อนรับ</h2>
+                <p className="text-[#7a6f63] text-center text-sm mb-6">กรอกเบอร์โทรศัพท์เพื่อดำเนินการต่อ</p>
 
                 <div className="space-y-4">
                   <div>
-                    <label className="block text-[13px] font-semibold text-[#7a6f63] mb-2">เบอร์โทรศัพท์</label>
+                    <label className="block text-sm font-medium text-[#7a6f63] mb-2">เบอร์โทรศัพท์</label>
                     <PhoneInput
                       value={phone}
                       onChange={setPhone}
@@ -299,21 +291,14 @@ export default function SellerLoginPage() {
                   <button
                     onClick={handleSendOTP}
                     disabled={loading || phone.length < 9}
-                    className="btn-primary w-full !py-3.5 !text-base"
+                    className="w-full py-4 bg-[#1a1a1a] text-white font-semibold rounded-full disabled:opacity-50"
                   >
-                    {loading ? (
-                      <span className="flex items-center justify-center gap-2">
-                        <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                        กำลังส่ง...
-                      </span>
-                    ) : (
-                      'ดำเนินการต่อ →'
-                    )}
+                    {loading ? 'กำลังส่ง...' : 'ดำเนินการต่อ →'}
                   </button>
 
-                  <p className="text-[11px] text-[#a3a3a3] text-center leading-relaxed">
+                  <p className="text-xs text-[#a3a3a3] text-center">
                     การดำเนินการต่อถือว่าคุณยอมรับ{' '}
-                    <Link href="/terms" className="text-[#7a6f63] underline">ข้อกำหนดการใช้งาน</Link>
+                    <Link href="/terms" className="text-[#7a6f63] underline">ข้อกำหนด</Link>
                     {' '}และ{' '}
                     <Link href="/privacy" className="text-[#7a6f63] underline">นโยบายความเป็นส่วนตัว</Link>
                   </p>
@@ -321,8 +306,8 @@ export default function SellerLoginPage() {
               </div>
 
               {/* Footer */}
-              <div className="text-center mt-5">
-                <p className="text-[13px] text-[#7a6f63]">
+              <div className="text-center mt-6">
+                <p className="text-sm text-[#7a6f63]">
                   ยังไม่มีบัญชี?{' '}
                   <Link href="/seller/signup" className="text-[#22c55e] font-semibold">
                     สร้างร้านค้า
@@ -333,11 +318,11 @@ export default function SellerLoginPage() {
           ) : (
             <>
               {/* OTP Card */}
-              <div className="glass-card !rounded-[24px] p-5 text-center animate-fade-in-up">
+              <div className="bg-white rounded-3xl p-6 shadow-lg border border-white/50 text-center">
                 <div className="text-5xl mb-4">📱</div>
-                <h2 className="text-xl font-extrabold text-[#1a1a1a] mb-1">ยืนยันเบอร์โทร</h2>
+                <h2 className="text-xl font-bold text-[#1a1a1a] mb-1">ยืนยันเบอร์โทร</h2>
                 <p className="text-[#7a6f63] text-sm mb-1">รหัส 6 หลักถูกส่งไปที่</p>
-                <p className="text-base font-bold text-[#1a1a1a] mb-5">{formatPhoneDisplay(phone)}</p>
+                <p className="text-base font-bold text-[#1a1a1a] mb-6">{formatPhoneDisplay(phone)}</p>
 
                 <div className="space-y-4">
                   <OTPInput
@@ -350,19 +335,12 @@ export default function SellerLoginPage() {
                   <button
                     onClick={handleVerifyOTP}
                     disabled={loading || otp.length !== 6}
-                    className="btn-primary w-full !py-3.5 !text-base"
+                    className="w-full py-4 bg-[#1a1a1a] text-white font-semibold rounded-full disabled:opacity-50"
                   >
-                    {loading ? (
-                      <span className="flex items-center justify-center gap-2">
-                        <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                        กำลังยืนยัน...
-                      </span>
-                    ) : (
-                      'ยืนยัน →'
-                    )}
+                    {loading ? 'กำลังยืนยัน...' : 'ยืนยัน →'}
                   </button>
 
-                  <p className="text-[13px] text-[#7a6f63]">
+                  <p className="text-sm text-[#7a6f63]">
                     ไม่ได้รับรหัส?{' '}
                     {countdown > 0 ? (
                       <span className="font-bold text-[#22c55e]">ส่งใหม่ใน {countdown}s</span>
@@ -370,7 +348,7 @@ export default function SellerLoginPage() {
                       <button
                         onClick={handleResend}
                         disabled={loading}
-                        className="font-bold text-[#22c55e] hover:underline"
+                        className="font-bold text-[#22c55e]"
                       >
                         ส่งรหัสใหม่
                       </button>
@@ -380,7 +358,7 @@ export default function SellerLoginPage() {
                   <button
                     onClick={handleChangeNumber}
                     disabled={loading}
-                    className="text-[13px] text-[#7a6f63] font-semibold hover:text-[#1a1a1a] transition-colors"
+                    className="text-sm text-[#7a6f63] font-medium"
                   >
                     ← เปลี่ยนเบอร์โทร
                   </button>
