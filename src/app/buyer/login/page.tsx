@@ -7,7 +7,6 @@ import { auth, RecaptchaVerifier, signInWithPhoneNumber, ConfirmationResult } fr
 
 type Step = 'phone' | 'otp'
 
-// Extend window for recaptcha
 declare global {
   interface Window {
     recaptchaVerifier?: RecaptchaVerifier
@@ -18,7 +17,6 @@ declare global {
 function BuyerLoginContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
-  // Validate redirect to prevent open redirect vulnerability
   const rawRedirect = searchParams.get('redirect') || '/buyer/account'
   const redirect = rawRedirect.startsWith('/') && !rawRedirect.startsWith('//') ? rawRedirect : '/buyer/account'
 
@@ -32,27 +30,22 @@ function BuyerLoginContent() {
 
   const otpRefs = useRef<(HTMLInputElement | null)[]>([])
 
-  // Initialize reCAPTCHA
   const initRecaptcha = useCallback(() => {
     if (typeof window === 'undefined') return
 
-    // Clean up existing verifier
     if (window.recaptchaVerifier) {
       try {
         window.recaptchaVerifier.clear()
       } catch {
-        // Ignore errors when clearing
+        // Ignore
       }
       window.recaptchaVerifier = undefined
     }
 
-    // Create invisible reCAPTCHA
     try {
       window.recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
         size: 'invisible',
-        callback: () => {
-          // reCAPTCHA verified
-        },
+        callback: () => {},
         'expired-callback': () => {
           initRecaptcha()
         }
@@ -79,7 +72,6 @@ function BuyerLoginContent() {
     }
   }, [step, initRecaptcha])
 
-  // Cooldown timer
   useEffect(() => {
     if (cooldown > 0) {
       const timer = setTimeout(() => setCooldown(cooldown - 1), 1000)
@@ -87,7 +79,6 @@ function BuyerLoginContent() {
     }
   }, [cooldown])
 
-  // Format phone for display
   const formatPhone = (value: string) => {
     const digits = value.replace(/\D/g, '').slice(0, 10)
     if (digits.length <= 3) return digits
@@ -95,7 +86,6 @@ function BuyerLoginContent() {
     return `${digits.slice(0, 3)}-${digits.slice(3, 6)}-${digits.slice(6)}`
   }
 
-  // Convert Thai phone to international format
   const toInternationalPhone = (p: string): string => {
     const digits = p.replace(/\D/g, '')
     if (digits.startsWith('0')) {
@@ -147,13 +137,11 @@ function BuyerLoginContent() {
       window.confirmationResult = confirmationResult
       setStep('otp')
       setCooldown(60)
-      // Focus first OTP input
       setTimeout(() => otpRefs.current[0]?.focus(), 100)
     } catch (err: unknown) {
       console.error('Send OTP error:', err)
       const firebaseError = err as { code?: string; message?: string }
 
-      // Handle specific Firebase errors
       if (firebaseError.code === 'auth/invalid-phone-number') {
         setError('เบอร์โทรไม่ถูกต้อง')
       } else if (firebaseError.code === 'auth/too-many-requests') {
@@ -165,7 +153,6 @@ function BuyerLoginContent() {
         setError('ส่ง OTP ไม่สำเร็จ กรุณาลองใหม่')
       }
 
-      // Reset reCAPTCHA on error
       initRecaptcha()
     } finally {
       setLoading(false)
@@ -180,12 +167,10 @@ function BuyerLoginContent() {
     setOtp(newOtp)
     setError('')
 
-    // Auto-focus next input
     if (value && index < 5) {
       otpRefs.current[index + 1]?.focus()
     }
 
-    // Auto-submit when complete
     if (value && index === 5) {
       const fullOtp = [...newOtp.slice(0, 5), value.slice(-1)].join('')
       if (fullOtp.length === 6) {
@@ -227,14 +212,10 @@ function BuyerLoginContent() {
     setError('')
 
     try {
-      // Verify OTP with Firebase
       const result = await window.confirmationResult.confirm(code)
       const user = result.user
-
-      // Get ID token
       const idToken = await user.getIdToken()
 
-      // Send to backend to create/login buyer
       const res = await fetch('/api/auth/buyer/verify-firebase', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -253,7 +234,6 @@ function BuyerLoginContent() {
         return
       }
 
-      // Success - redirect
       router.push(redirect)
     } catch (err: unknown) {
       console.error('Verify OTP error:', err)
@@ -283,12 +263,11 @@ function BuyerLoginContent() {
   }
 
   return (
-    <div className="h-[100dvh] bg-white overflow-hidden fixed inset-0 flex flex-col">
-      {/* Firebase reCAPTCHA container */}
+    <div className="min-h-[100dvh] bg-white">
       <div id="recaptcha-container" />
 
       {/* Header */}
-      <header className="bg-white border-b border-border flex-shrink-0 pt-[env(safe-area-inset-top)]">
+      <header className="sticky top-0 bg-white border-b border-neutral-200 z-10 pt-[max(0px,env(safe-area-inset-top))]">
         <div className="flex items-center px-4 h-12">
           <Link
             href="/"
@@ -303,8 +282,8 @@ function BuyerLoginContent() {
         </div>
       </header>
 
-      {/* Main content - takes remaining space and centers content */}
-      <div className="flex-1 flex flex-col justify-center px-5 pb-[env(safe-area-inset-bottom)] max-w-md mx-auto w-full">
+      {/* Main content */}
+      <div className="flex flex-col justify-center px-5 py-8 max-w-md mx-auto w-full" style={{ minHeight: 'calc(100dvh - 48px - max(0px, env(safe-area-inset-top)))' }}>
         {step === 'phone' ? (
           <>
             <div className="text-center mb-6">
@@ -314,7 +293,7 @@ function BuyerLoginContent() {
                 </svg>
               </div>
               <h2 className="text-xl font-bold mb-1">เข้าสู่ระบบ</h2>
-              <p className="text-secondary text-sm">กรอกเบอร์โทรเพื่อดำเนินการต่อ</p>
+              <p className="text-neutral-500 text-sm">กรอกเบอร์โทรเพื่อดำเนินการต่อ</p>
             </div>
 
             <div className="space-y-4">
@@ -325,13 +304,13 @@ function BuyerLoginContent() {
                   value={phone}
                   onChange={handlePhoneChange}
                   placeholder="08X-XXX-XXXX"
-                  className="w-full px-4 py-3 border border-border rounded-lg text-lg tracking-wider outline-none focus:ring-2 focus:ring-black focus:ring-offset-1"
+                  className="w-full px-4 py-3 border border-neutral-300 rounded-lg text-lg tracking-wider outline-none focus:ring-2 focus:ring-black focus:ring-offset-1"
                   autoFocus
                 />
               </div>
 
               {error && (
-                <p className="text-error text-sm">{error}</p>
+                <p className="text-red-500 text-sm">{error}</p>
               )}
 
               <button
@@ -359,7 +338,7 @@ function BuyerLoginContent() {
                 </svg>
               </div>
               <h2 className="text-xl font-bold mb-1">ยืนยันรหัส OTP</h2>
-              <p className="text-secondary text-sm">
+              <p className="text-neutral-500 text-sm">
                 ส่งรหัสไปที่ <span className="font-medium text-black">{phone}</span>
               </p>
             </div>
@@ -376,13 +355,13 @@ function BuyerLoginContent() {
                   value={digit}
                   onChange={(e) => handleOtpChange(index, e.target.value)}
                   onKeyDown={(e) => handleOtpKeyDown(index, e)}
-                  className="w-11 h-13 text-center text-2xl font-bold border border-border rounded-lg outline-none focus:ring-2 focus:ring-black focus:ring-offset-1"
+                  className="w-11 h-13 text-center text-2xl font-bold border border-neutral-300 rounded-lg outline-none focus:ring-2 focus:ring-black focus:ring-offset-1"
                 />
               ))}
             </div>
 
             {error && (
-              <p className="text-error text-sm text-center mb-4">{error}</p>
+              <p className="text-red-500 text-sm text-center mb-4">{error}</p>
             )}
 
             <button
@@ -404,7 +383,7 @@ function BuyerLoginContent() {
               <button
                 onClick={handleResendOTP}
                 disabled={cooldown > 0 || loading}
-                className="text-secondary hover:text-black disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-sm"
+                className="text-neutral-500 hover:text-black disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-sm"
               >
                 {cooldown > 0 ? `ส่งรหัสใหม่ (${cooldown}s)` : 'ส่งรหัสใหม่'}
               </button>
@@ -417,7 +396,7 @@ function BuyerLoginContent() {
                   window.confirmationResult = undefined
                   initRecaptcha()
                 }}
-                className="block w-full py-2 text-secondary hover:text-black transition-colors text-sm"
+                className="block w-full py-2 text-neutral-500 hover:text-black transition-colors text-sm"
               >
                 เปลี่ยนเบอร์โทร
               </button>
@@ -429,10 +408,9 @@ function BuyerLoginContent() {
   )
 }
 
-// Loading fallback for Suspense
 function LoginLoading() {
   return (
-    <div className="h-[100dvh] bg-white flex items-center justify-center fixed inset-0">
+    <div className="min-h-screen bg-white flex items-center justify-center">
       <div className="w-8 h-8 border-2 border-black border-t-transparent rounded-full animate-spin" />
     </div>
   )

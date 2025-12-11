@@ -9,7 +9,6 @@ import { auth, RecaptchaVerifier, signInWithPhoneNumber, ConfirmationResult } fr
 
 type Step = 'phone' | 'otp'
 
-// Extend window for recaptcha
 declare global {
   interface Window {
     recaptchaVerifier?: RecaptchaVerifier
@@ -28,11 +27,9 @@ export default function SellerLoginPage() {
   const [checkingSession, setCheckingSession] = useState(true)
   const [countdown, setCountdown] = useState(0)
 
-  // Initialize reCAPTCHA
   const initRecaptcha = useCallback(() => {
     if (typeof window === 'undefined') return
 
-    // Clean up existing verifier
     if (window.recaptchaVerifier) {
       try {
         window.recaptchaVerifier.clear()
@@ -42,13 +39,10 @@ export default function SellerLoginPage() {
       window.recaptchaVerifier = undefined
     }
 
-    // Create invisible reCAPTCHA
     try {
       window.recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
         size: 'invisible',
-        callback: () => {
-          // reCAPTCHA verified
-        },
+        callback: () => {},
         'expired-callback': () => {
           initRecaptcha()
         }
@@ -69,7 +63,7 @@ export default function SellerLoginPage() {
           return
         }
       } catch {
-        // Not logged in, continue
+        // Not logged in
       }
       setCheckingSession(false)
     }
@@ -99,7 +93,6 @@ export default function SellerLoginPage() {
     }
   }, [countdown])
 
-  // Convert Thai phone to international format
   const toInternationalPhone = (p: string): string => {
     const digits = p.replace(/\D/g, '')
     if (digits.startsWith('0')) {
@@ -148,7 +141,6 @@ export default function SellerLoginPage() {
       console.error('Send OTP error:', err)
       const firebaseError = err as { code?: string; message?: string }
 
-      // Handle specific Firebase errors
       if (firebaseError.code === 'auth/invalid-phone-number') {
         setError('เบอร์โทรไม่ถูกต้อง')
       } else if (firebaseError.code === 'auth/too-many-requests') {
@@ -160,7 +152,6 @@ export default function SellerLoginPage() {
         setError('ส่ง OTP ไม่สำเร็จ กรุณาลองใหม่')
       }
 
-      // Reset reCAPTCHA on error
       initRecaptcha()
     } finally {
       setLoading(false)
@@ -183,14 +174,10 @@ export default function SellerLoginPage() {
     setLoading(true)
 
     try {
-      // Verify OTP with Firebase
       const result = await window.confirmationResult.confirm(otp)
       const user = result.user
-
-      // Get ID token
       const idToken = await user.getIdToken()
 
-      // Send to backend to create/login seller
       const res = await fetch('/api/auth/seller/verify-firebase', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -229,8 +216,6 @@ export default function SellerLoginPage() {
     setOtp('')
     setError('')
     setStep('phone')
-
-    // Re-init recaptcha and send
     initRecaptcha()
     await new Promise(resolve => setTimeout(resolve, 500))
     await handleSendOTP()
@@ -265,33 +250,29 @@ export default function SellerLoginPage() {
   }
 
   return (
-    <div className="h-[100dvh] bg-gradient-main overflow-hidden fixed inset-0">
-      {/* Firebase reCAPTCHA container */}
+    <div className="min-h-[100dvh] bg-gradient-main">
       <div id="recaptcha-container" />
 
-      {/* Ambient lights */}
       <div className="ambient-1" />
       <div className="ambient-2" />
-
-      {/* Decorative bubbles */}
       <div className="bubble bubble-1" />
       <div className="bubble bubble-2" />
       <div className="bubble bubble-3" />
 
-      <div className="h-full flex flex-col px-4 pt-[env(safe-area-inset-top)] pb-[env(safe-area-inset-bottom)] relative z-10">
-        {/* Back button - fixed height */}
-        <div className="pt-2 pb-2">
-          <Link href="/" className="inline-flex items-center gap-1.5 text-[15px] font-semibold text-[#7a6f63] hover:text-[#1a1a1a] transition-colors w-fit">
+      <div className="min-h-[100dvh] flex flex-col px-4 pt-[max(12px,env(safe-area-inset-top))] pb-[max(20px,env(safe-area-inset-bottom))] relative z-10">
+        {/* Back button */}
+        <div className="py-2">
+          <Link href="/" className="inline-flex items-center gap-1.5 text-[15px] font-semibold text-[#7a6f63] hover:text-[#1a1a1a] transition-colors">
             <span>←</span> กลับ
           </Link>
         </div>
 
-        {/* Main content - takes remaining space */}
-        <div className="flex-1 flex flex-col justify-center max-w-sm mx-auto w-full">
+        {/* Main content */}
+        <div className="flex-1 flex flex-col justify-center max-w-sm mx-auto w-full py-4">
           {step === 'phone' ? (
             <>
-              {/* Logo section */}
-              <div className="text-center mb-8 animate-fade-in-down">
+              {/* Logo */}
+              <div className="text-center mb-6 animate-fade-in-down">
                 <h1 className="text-4xl font-black tracking-tight mb-1">
                   <span className="text-[#1a1a1a]">Tap</span>
                   <span className="text-[#22c55e]">Shop</span>
@@ -326,7 +307,7 @@ export default function SellerLoginPage() {
                         กำลังส่ง...
                       </span>
                     ) : (
-                      <>ดำเนินการต่อ →</>
+                      'ดำเนินการต่อ →'
                     )}
                   </button>
 
@@ -377,7 +358,7 @@ export default function SellerLoginPage() {
                         กำลังยืนยัน...
                       </span>
                     ) : (
-                      <>ยืนยัน →</>
+                      'ยืนยัน →'
                     )}
                   </button>
 

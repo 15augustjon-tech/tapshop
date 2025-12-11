@@ -9,7 +9,6 @@ import { auth, RecaptchaVerifier, signInWithPhoneNumber, ConfirmationResult } fr
 
 type Step = 'phone' | 'otp'
 
-// Extend window for recaptcha
 declare global {
   interface Window {
     recaptchaVerifier?: RecaptchaVerifier
@@ -28,27 +27,22 @@ export default function SellerSignupPage() {
   const [checkingSession, setCheckingSession] = useState(true)
   const [countdown, setCountdown] = useState(0)
 
-  // Initialize reCAPTCHA
   const initRecaptcha = useCallback(() => {
     if (typeof window === 'undefined') return
 
-    // Clean up existing verifier
     if (window.recaptchaVerifier) {
       try {
         window.recaptchaVerifier.clear()
       } catch {
-        // Ignore errors when clearing
+        // Ignore
       }
       window.recaptchaVerifier = undefined
     }
 
-    // Create invisible reCAPTCHA
     try {
       window.recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
         size: 'invisible',
-        callback: () => {
-          // reCAPTCHA verified
-        },
+        callback: () => {},
         'expired-callback': () => {
           initRecaptcha()
         }
@@ -73,7 +67,7 @@ export default function SellerSignupPage() {
           return
         }
       } catch {
-        // Not logged in, continue with signup
+        // Not logged in
       }
       setCheckingSession(false)
     }
@@ -103,7 +97,6 @@ export default function SellerSignupPage() {
     }
   }, [countdown])
 
-  // Convert Thai phone to international format
   const toInternationalPhone = (p: string): string => {
     const digits = p.replace(/\D/g, '')
     if (digits.startsWith('0')) {
@@ -152,7 +145,6 @@ export default function SellerSignupPage() {
       console.error('Send OTP error:', err)
       const firebaseError = err as { code?: string; message?: string }
 
-      // Handle specific Firebase errors
       if (firebaseError.code === 'auth/invalid-phone-number') {
         setError('เบอร์โทรไม่ถูกต้อง')
       } else if (firebaseError.code === 'auth/too-many-requests') {
@@ -164,7 +156,6 @@ export default function SellerSignupPage() {
         setError('ส่ง OTP ไม่สำเร็จ กรุณาลองใหม่')
       }
 
-      // Reset reCAPTCHA on error
       initRecaptcha()
     } finally {
       setLoading(false)
@@ -187,14 +178,10 @@ export default function SellerSignupPage() {
     setLoading(true)
 
     try {
-      // Verify OTP with Firebase
       const result = await window.confirmationResult.confirm(otp)
       const user = result.user
-
-      // Get ID token
       const idToken = await user.getIdToken()
 
-      // Send to backend to create/login seller
       const res = await fetch('/api/auth/seller/verify-firebase', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -233,8 +220,6 @@ export default function SellerSignupPage() {
     setOtp('')
     setError('')
     setStep('phone')
-
-    // Re-init recaptcha and send
     initRecaptcha()
     await new Promise(resolve => setTimeout(resolve, 500))
     await handleSendOTP()
@@ -260,7 +245,7 @@ export default function SellerSignupPage() {
 
   if (checkingSession) {
     return (
-      <div className="h-[100dvh] bg-gradient-main flex items-center justify-center fixed inset-0">
+      <div className="min-h-screen bg-gradient-main flex items-center justify-center">
         <div className="icon-box w-16 h-16 !rounded-[20px] animate-pulse">
           <div className="w-6 h-6 border-2 border-[#1a1a1a] border-t-transparent rounded-full animate-spin" />
         </div>
@@ -269,30 +254,26 @@ export default function SellerSignupPage() {
   }
 
   return (
-    <div className="h-[100dvh] bg-gradient-main overflow-hidden fixed inset-0">
-      {/* Firebase reCAPTCHA container */}
+    <div className="min-h-[100dvh] bg-gradient-main">
       <div id="recaptcha-container" />
 
-      {/* Ambient lights */}
       <div className="ambient-1" />
       <div className="ambient-2" />
-
-      {/* Decorative bubbles */}
       <div className="bubble bubble-1" />
       <div className="bubble bubble-2" />
       <div className="bubble bubble-3" />
 
-      <div className="h-full flex flex-col px-4 pt-[env(safe-area-inset-top)] pb-[env(safe-area-inset-bottom)] relative z-10">
-        {/* Header with back and step indicator */}
-        <div className="flex items-center justify-between pt-2 pb-2">
+      <div className="min-h-[100dvh] flex flex-col px-4 pt-[max(12px,env(safe-area-inset-top))] pb-[max(20px,env(safe-area-inset-bottom))] relative z-10">
+        {/* Header */}
+        <div className="flex items-center justify-between py-2">
           <Link href="/" className="inline-flex items-center gap-1.5 text-[15px] font-semibold text-[#7a6f63] hover:text-[#1a1a1a] transition-colors">
             <span>←</span> กลับ
           </Link>
           <span className="text-[13px] font-semibold text-[#22c55e]">ขั้นตอน 1 / 3</span>
         </div>
 
-        {/* Main content - takes remaining space */}
-        <div className="flex-1 flex flex-col justify-center max-w-sm mx-auto w-full">
+        {/* Main content */}
+        <div className="flex-1 flex flex-col justify-center max-w-sm mx-auto w-full py-4">
           {step === 'phone' ? (
             <>
               {/* Title */}
@@ -325,7 +306,7 @@ export default function SellerSignupPage() {
                         กำลังส่ง...
                       </span>
                     ) : (
-                      <>ดำเนินการต่อ →</>
+                      'ดำเนินการต่อ →'
                     )}
                   </button>
 
@@ -366,7 +347,7 @@ export default function SellerSignupPage() {
                         กำลังยืนยัน...
                       </span>
                     ) : (
-                      <>ยืนยัน →</>
+                      'ยืนยัน →'
                     )}
                   </button>
 

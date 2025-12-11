@@ -804,3 +804,11 @@ body {
   background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.5), transparent);
   margin: 16px 0;
 }
+
+/* Hide reCAPTCHA badge */
+.grecaptcha-badge {
+  visibility: hidden !important;
+  opacity: 0 !important;
+  position: absolute !important;
+  bottom: -100px !important;
+}
