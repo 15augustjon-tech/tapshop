@@ -249,7 +249,7 @@ export default function SellerSettingsPage() {
       <div className="ambient-1" />
       <div className="ambient-2" />
 
-      <div className="px-4 pt-[env(safe-area-inset-top)] pb-24 relative z-10">
+      <div className="px-4 pt-[env(safe-area-inset-top)] pb-20 relative z-10">
         <div className="max-w-md mx-auto pt-2">
           {/* Header */}
           <div className="flex items-center gap-3 mb-4">

@@ -235,7 +235,7 @@ export default function SellerDashboard() {
       <div className="ambient-1" />
       <div className="ambient-2" />
 
-      <div className="px-4 pb-24 pt-[env(safe-area-inset-top)] relative z-10">
+      <div className="px-4 pb-20 pt-[env(safe-area-inset-top)] relative z-10">
         {/* Header with Preview and QR Buttons */}
         <div className="flex items-center justify-between pt-2">
           <div className="flex-1">

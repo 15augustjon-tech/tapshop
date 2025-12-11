@@ -263,7 +263,7 @@ function BuyerLoginContent() {
   }
 
   return (
-    <div className="min-h-[100dvh] bg-white">
+    <div className="min-h-[100dvh] bg-white flex flex-col">
       <div id="recaptcha-container" />
 
       {/* Header */}
@@ -283,7 +283,7 @@ function BuyerLoginContent() {
       </header>
 
       {/* Main content */}
-      <div className="flex flex-col justify-center px-5 py-8 max-w-md mx-auto w-full" style={{ minHeight: 'calc(100dvh - 48px - max(0px, env(safe-area-inset-top)))' }}>
+      <div className="flex flex-col justify-center px-5 py-6 max-w-md mx-auto w-full flex-1">
         {step === 'phone' ? (
           <>
             <div className="text-center mb-6">

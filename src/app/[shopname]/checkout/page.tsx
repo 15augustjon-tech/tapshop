@@ -229,7 +229,7 @@ export default function CheckoutAddressPage({ params }: Props) {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-main pb-32 overflow-x-hidden">
+    <div className="min-h-screen bg-gradient-main pb-20 overflow-x-hidden">
       {/* Ambient Lights */}
       <div className="ambient-1" />
       <div className="ambient-2" />
