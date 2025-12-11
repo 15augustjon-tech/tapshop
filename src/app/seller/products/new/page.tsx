@@ -50,19 +50,21 @@ export default function AddProductPage() {
       <div className="ambient-2" />
 
       {/* Header */}
-      <header className="sticky top-0 z-20 px-4 pt-4">
-        <div className="glass-card !rounded-[16px]">
-          <div className="flex items-center px-4 h-[56px]">
-            <Link
-              href="/seller/dashboard"
-              className="w-10 h-10 flex items-center justify-center glass-card-inner !rounded-full hover:scale-110 transition-transform -ml-2"
-            >
-              <svg className="w-5 h-5 text-[#1a1a1a]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-              </svg>
-            </Link>
-            <h1 className="flex-1 text-center font-bold text-[#1a1a1a]">เพิ่มสินค้า</h1>
-            <div className="w-10" />
+      <header className="sticky top-0 z-20 px-4 pt-[env(safe-area-inset-top)]">
+        <div className="pt-2">
+          <div className="glass-card !rounded-[16px]">
+            <div className="flex items-center px-4 h-[52px]">
+              <Link
+                href="/seller/dashboard"
+                className="w-10 h-10 flex items-center justify-center glass-card-inner !rounded-full hover:scale-110 transition-transform -ml-2"
+              >
+                <svg className="w-5 h-5 text-[#1a1a1a]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                </svg>
+              </Link>
+              <h1 className="flex-1 text-center font-bold text-[#1a1a1a]">เพิ่มสินค้า</h1>
+              <div className="w-10" />
+            </div>
           </div>
         </div>
       </header>

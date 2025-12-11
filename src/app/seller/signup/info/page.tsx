@@ -134,12 +134,12 @@ export default function ShopInfoPage() {
     <div className="min-h-screen bg-gradient-main overflow-x-hidden">
       <div className="ambient-1" />
       <div className="ambient-2" />
-      <div className="px-4 pt-4 pb-8 relative z-10">
-        <div className="max-w-md mx-auto">
+      <div className="px-4 pt-[env(safe-area-inset-top)] pb-8 relative z-10">
+        <div className="max-w-md mx-auto pt-2">
           <ProgressBar currentStep={2} totalSteps={3} />
 
-          <h1 className="text-3xl font-bold text-[#1a1a1a] mb-2">ข้อมูลร้านค้า</h1>
-          <p className="text-[#7a6f63] mb-8">กรอกข้อมูลเพื่อสร้างร้านค้าของคุณ</p>
+          <h1 className="text-2xl font-bold text-[#1a1a1a] mb-1">ข้อมูลร้านค้า</h1>
+          <p className="text-[#7a6f63] text-sm mb-5">กรอกข้อมูลเพื่อสร้างร้านค้าของคุณ</p>
 
           {errors.general && (
             <div className="mb-6 glass-card !rounded-[16px] p-4 border border-[#ef4444]/30 bg-gradient-to-r from-[#ef4444]/10 to-[#ef4444]/5">

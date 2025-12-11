@@ -96,8 +96,8 @@ export default function BuyerAccountPage() {
   return (
     <div className="min-h-screen bg-white">
       {/* Header */}
-      <header className="sticky top-0 bg-white border-b border-border z-10">
-        <div className="flex items-center justify-between px-[5%] h-14">
+      <header className="sticky top-0 bg-white border-b border-border z-10 pt-[env(safe-area-inset-top)]">
+        <div className="flex items-center justify-between px-4 h-12">
           <Link
             href="/"
             className="p-2 -ml-2 hover:bg-neutral-100 rounded-full transition-colors"
@@ -117,11 +117,11 @@ export default function BuyerAccountPage() {
         </div>
       </header>
 
-      <div className="px-[5%] py-6 max-w-md mx-auto">
+      <div className="px-4 py-4 max-w-md mx-auto">
         {/* Profile Section */}
-        <div className="mb-8">
-          <div className="flex items-center gap-4 mb-6">
-            <div className="w-16 h-16 bg-black rounded-full flex items-center justify-center">
+        <div className="mb-6">
+          <div className="flex items-center gap-4 mb-4">
+            <div className="w-14 h-14 bg-black rounded-full flex items-center justify-center">
               <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
               </svg>

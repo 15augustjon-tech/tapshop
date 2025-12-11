@@ -249,10 +249,10 @@ export default function SellerSettingsPage() {
       <div className="ambient-1" />
       <div className="ambient-2" />
 
-      <div className="px-4 pt-4 pb-24 relative z-10">
-        <div className="max-w-md mx-auto">
+      <div className="px-4 pt-[env(safe-area-inset-top)] pb-24 relative z-10">
+        <div className="max-w-md mx-auto pt-2">
           {/* Header */}
-          <div className="flex items-center gap-3 mb-6">
+          <div className="flex items-center gap-3 mb-4">
             <Link
               href="/seller/dashboard"
               className="w-10 h-10 flex items-center justify-center glass-card-inner !rounded-full hover:scale-110 transition-transform"
