@@ -21,10 +21,12 @@ export async function POST(request: NextRequest) {
     try {
       const adminAuth = getAdminAuth()
       decodedToken = await adminAuth.verifyIdToken(idToken)
+      console.log('Token verified for phone:', decodedToken.phone_number)
     } catch (err) {
       console.error('Firebase token verification error:', err)
+      const errorMessage = err instanceof Error ? err.message : 'Unknown error'
       return NextResponse.json(
-        { success: false, error: 'invalid_token', message: 'การยืนยันตัวตนล้มเหลว กรุณาลองใหม่' },
+        { success: false, error: 'invalid_token', message: 'การยืนยันตัวตนล้มเหลว: ' + errorMessage },
         { status: 401 }
       )
     }
