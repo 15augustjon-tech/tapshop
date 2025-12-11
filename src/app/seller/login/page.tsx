@@ -48,17 +48,64 @@ export default function SellerLoginPage() {
     }
   }, [countdown])
 
-  const initRecaptcha = () => {
+  // Initialize reCAPTCHA on mount to prevent race conditions
+  useEffect(() => {
+    if (!checkingSession && recaptchaContainerRef.current && !recaptchaVerifierRef.current) {
+      try {
+        recaptchaVerifierRef.current = new RecaptchaVerifier(auth, recaptchaContainerRef.current, {
+          size: 'invisible',
+          callback: () => {},
+          'expired-callback': () => {
+            if (recaptchaVerifierRef.current) {
+              recaptchaVerifierRef.current.clear()
+              recaptchaVerifierRef.current = null
+            }
+            setError('reCAPTCHA หมดอายุ กรุณาลองใหม่')
+          }
+        })
+      } catch (err) {
+        console.error('Failed to initialize reCAPTCHA:', err)
+      }
+    }
+
+    return () => {
+      if (recaptchaVerifierRef.current) {
+        try {
+          recaptchaVerifierRef.current.clear()
+        } catch {
+          // Ignore cleanup errors
+        }
+        recaptchaVerifierRef.current = null
+      }
+    }
+  }, [checkingSession])
+
+  const initRecaptcha = async () => {
     if (!recaptchaContainerRef.current) return
 
     if (recaptchaVerifierRef.current) {
-      recaptchaVerifierRef.current.clear()
+      try {
+        recaptchaVerifierRef.current.clear()
+      } catch {
+        // Ignore
+      }
+      recaptchaVerifierRef.current = null
     }
+
+    if (recaptchaContainerRef.current) {
+      recaptchaContainerRef.current.innerHTML = ''
+    }
+
+    await new Promise(resolve => setTimeout(resolve, 100))
 
     recaptchaVerifierRef.current = new RecaptchaVerifier(auth, recaptchaContainerRef.current, {
       size: 'invisible',
       callback: () => {},
       'expired-callback': () => {
+        if (recaptchaVerifierRef.current) {
+          recaptchaVerifierRef.current.clear()
+          recaptchaVerifierRef.current = null
+        }
         setError('reCAPTCHA หมดอายุ กรุณาลองใหม่')
       }
     })
@@ -87,11 +134,13 @@ export default function SellerLoginPage() {
     try {
       // Always ensure reCAPTCHA is ready
       if (!recaptchaVerifierRef.current) {
-        // Reset container first to be safe
-        if (recaptchaContainerRef.current) {
-          recaptchaContainerRef.current.innerHTML = ''
-        }
-        initRecaptcha()
+        await initRecaptcha()
+      }
+
+      if (!recaptchaVerifierRef.current) {
+        setError('reCAPTCHA ไม่พร้อม กรุณารีเฟรชหน้า')
+        setLoading(false)
+        return
       }
 
       const intlPhone = toInternationalPhone(phone)
@@ -200,14 +249,7 @@ export default function SellerLoginPage() {
       recaptchaVerifierRef.current = null
     }
 
-    // Reset the container's innerHTML to allow fresh reCAPTCHA
-    if (recaptchaContainerRef.current) {
-      recaptchaContainerRef.current.innerHTML = ''
-    }
-
-    // Force re-init reCAPTCHA
-    initRecaptcha()
-
+    // handleSendOTP will re-init reCAPTCHA if needed
     await handleSendOTP()
   }
 

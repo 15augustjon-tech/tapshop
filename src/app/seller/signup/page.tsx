@@ -53,17 +53,70 @@ export default function SellerSignupPage() {
     }
   }, [countdown])
 
-  const initRecaptcha = () => {
+  // Initialize reCAPTCHA on mount to prevent race conditions
+  useEffect(() => {
+    if (!checkingSession && recaptchaContainerRef.current && !recaptchaVerifierRef.current) {
+      try {
+        recaptchaVerifierRef.current = new RecaptchaVerifier(auth, recaptchaContainerRef.current, {
+          size: 'invisible',
+          callback: () => {
+            // reCAPTCHA solved - will proceed with signInWithPhoneNumber
+          },
+          'expired-callback': () => {
+            // Reset on expiry so next attempt creates fresh verifier
+            if (recaptchaVerifierRef.current) {
+              recaptchaVerifierRef.current.clear()
+              recaptchaVerifierRef.current = null
+            }
+            setError('reCAPTCHA หมดอายุ กรุณาลองใหม่')
+          }
+        })
+      } catch (err) {
+        console.error('Failed to initialize reCAPTCHA:', err)
+      }
+    }
+
+    return () => {
+      if (recaptchaVerifierRef.current) {
+        try {
+          recaptchaVerifierRef.current.clear()
+        } catch {
+          // Ignore cleanup errors
+        }
+        recaptchaVerifierRef.current = null
+      }
+    }
+  }, [checkingSession])
+
+  const initRecaptcha = async () => {
     if (!recaptchaContainerRef.current) return
 
+    // Clear existing verifier completely
     if (recaptchaVerifierRef.current) {
-      recaptchaVerifierRef.current.clear()
+      try {
+        recaptchaVerifierRef.current.clear()
+      } catch {
+        // Ignore
+      }
+      recaptchaVerifierRef.current = null
     }
+
+    // Reset container HTML
+    if (recaptchaContainerRef.current) {
+      recaptchaContainerRef.current.innerHTML = ''
+    }
+
+    // Small delay to ensure DOM is ready
+    await new Promise(resolve => setTimeout(resolve, 100))
 
     recaptchaVerifierRef.current = new RecaptchaVerifier(auth, recaptchaContainerRef.current, {
       size: 'invisible',
       callback: () => {},
       'expired-callback': () => {
+        if (recaptchaVerifierRef.current) {
+          recaptchaVerifierRef.current.clear()
+          recaptchaVerifierRef.current = null
+        }
         setError('reCAPTCHA หมดอายุ กรุณาลองใหม่')
       }
     })
@@ -92,11 +145,14 @@ export default function SellerSignupPage() {
     try {
       // Always ensure reCAPTCHA is ready
       if (!recaptchaVerifierRef.current) {
-        // Reset container first to be safe
-        if (recaptchaContainerRef.current) {
-          recaptchaContainerRef.current.innerHTML = ''
-        }
-        initRecaptcha()
+        await initRecaptcha()
+      }
+
+      // Double-check reCAPTCHA is initialized
+      if (!recaptchaVerifierRef.current) {
+        setError('reCAPTCHA ไม่พร้อม กรุณารีเฟรชหน้า')
+        setLoading(false)
+        return
       }
 
       const intlPhone = toInternationalPhone(phone)
@@ -206,14 +262,7 @@ export default function SellerSignupPage() {
       recaptchaVerifierRef.current = null
     }
 
-    // Reset the container's innerHTML to allow fresh reCAPTCHA
-    if (recaptchaContainerRef.current) {
-      recaptchaContainerRef.current.innerHTML = ''
-    }
-
-    // Force re-init reCAPTCHA
-    initRecaptcha()
-
+    // handleSendOTP will re-init reCAPTCHA if needed
     await handleSendOTP()
   }
 
